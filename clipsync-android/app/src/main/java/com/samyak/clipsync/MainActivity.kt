@@ -115,17 +115,20 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Signed in ✓", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
+                    Log.e("ClipSync", "Auth failed: ${e.javaClass.simpleName} - ${e.message}", e)
                     val msg = when {
                         e.message?.contains("user-not-found") == true -> "No account found. Try creating one."
                         e.message?.contains("wrong-password") == true || e.message?.contains("invalid-credential") == true -> "Incorrect password."
                         e.message?.contains("email-already-in-use") == true -> "Email already registered. Try signing in."
                         e.message?.contains("invalid-email") == true -> "Please enter a valid email."
-                        else -> e.message ?: "Sign-in failed"
+                        e.message?.contains("network") == true -> "No internet connection."
+                        else -> "Error: ${e.message}"
                     }
                     errorText.text = msg
                     errorText.visibility = View.VISIBLE
                     authBtn.isEnabled = true
                     authBtn.text = if (isSignUpMode) "Create Account" else "Sign In"
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                 }
         }
 
