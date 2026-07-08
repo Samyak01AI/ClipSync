@@ -131,6 +131,24 @@ async function togglePin(text, sourceDevice, createdAt) {
   renderCurrentTab();
 }
 
+async function deleteItem(item) {
+  if (!item.id) {
+    showToast("Cannot delete — no document ID");
+    return;
+  }
+  const res = await chrome.runtime.sendMessage({ type: "DELETE_HISTORY", docId: item.id });
+  if (res && res.ok) {
+    // Also remove from pinned if it was pinned
+    if (isPinned(item.text)) {
+      pinnedItems = pinnedItems.filter((p) => p.text !== item.text);
+      await chrome.storage.local.set({ pinnedItems });
+    }
+    showToast("Deleted ✓");
+  } else {
+    showToast("Delete failed: " + (res?.error || "unknown"));
+  }
+}
+
 function updateCounts() {
   const filtered = filterItems(currentHistory);
   allCount.textContent = filtered.length;
@@ -245,6 +263,19 @@ function renderItems(container, items, showPinAction = true) {
         togglePin(item.text);
       };
       actions.appendChild(removeBtn);
+    }
+
+    // Delete button (all tab)
+    if (activeTab === "all" && item.id) {
+      const delBtn = document.createElement("button");
+      delBtn.className = "clip-action-btn delete-btn";
+      delBtn.title = "Delete";
+      delBtn.textContent = "🗑️";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteItem(item);
+      };
+      actions.appendChild(delBtn);
     }
 
     meta.appendChild(actions);

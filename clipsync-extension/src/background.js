@@ -4,7 +4,7 @@ import {
   indexedDBLocalPersistence,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore, doc, collection, addDoc, onSnapshot, setDoc, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, collection, addDoc, deleteDoc, onSnapshot, setDoc, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_CONFIG, SHARED_ACCOUNT } from "./firebase-config.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
@@ -62,7 +62,7 @@ function startListening(uid) {
   if (unsubscribeHistory) unsubscribeHistory();
   const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
   unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
-    chrome.storage.local.set({ history: snap.docs.map((d) => d.data()) });
+    chrome.storage.local.set({ history: snap.docs.map((d) => ({ id: d.id, ...d.data() })) });
   });
 }
 
@@ -151,6 +151,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     pushClipboard(msg.text, "chrome")
       .then((res) => sendResponse(res))
       .catch((err) => sendResponse({ ok: false, error: err.message }));
-    return true; // keep the message channel open for the async response
+    return true;
+  }
+
+  if (msg.type === "DELETE_HISTORY") {
+    if (!currentUid || !msg.docId) {
+      sendResponse({ ok: false, error: "Missing uid or docId" });
+      return;
+    }
+    deleteDoc(doc(db, "clipboard", currentUid, "history", msg.docId))
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: err.message }));
+    return true;
   }
 });

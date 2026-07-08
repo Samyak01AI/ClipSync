@@ -29016,6 +29016,9 @@ This typically indicates that your device does not have a healthy Internet conne
     const r = __PRIVATE_cast(t.firestore, Firestore), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e, n), o = __PRIVATE_newUserDataReader(r);
     return executeWrite(r, [__PRIVATE_parseSetData(o, "setDoc", t._key, s, null !== t.converter, n).toMutation(t._key, Precondition.none())]);
   }
+  function deleteDoc(t) {
+    return executeWrite(__PRIVATE_cast(t.firestore, Firestore), [new __PRIVATE_DeleteMutation(t._key, Precondition.none())]);
+  }
   function addDoc(t, e) {
     const n = __PRIVATE_cast(t.firestore, Firestore), r = doc(t), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e), o = __PRIVATE_newUserDataReader(t.firestore);
     return executeWrite(n, [__PRIVATE_parseSetData(o, "addDoc", r._key, s, null !== t.converter, {}).toMutation(r._key, Precondition.exists(false))]).then((() => r));
@@ -29139,7 +29142,7 @@ This typically indicates that your device does not have a healthy Internet conne
     if (unsubscribeHistory) unsubscribeHistory();
     const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
     unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
-      chrome.storage.local.set({ history: snap.docs.map((d) => d.data()) });
+      chrome.storage.local.set({ history: snap.docs.map((d) => ({ id: d.id, ...d.data() })) });
     });
   }
   async function signIn() {
@@ -29212,6 +29215,14 @@ This typically indicates that your device does not have a healthy Internet conne
     }
     if (msg.type === "PUSH_CLIPBOARD") {
       pushClipboard(msg.text, "chrome").then((res) => sendResponse(res)).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
+    }
+    if (msg.type === "DELETE_HISTORY") {
+      if (!currentUid || !msg.docId) {
+        sendResponse({ ok: false, error: "Missing uid or docId" });
+        return;
+      }
+      deleteDoc(doc(db, "clipboard", currentUid, "history", msg.docId)).then(() => sendResponse({ ok: true })).catch((err) => sendResponse({ ok: false, error: err.message }));
       return true;
     }
   });

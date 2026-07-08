@@ -115,6 +115,22 @@
     updateCounts();
     renderCurrentTab();
   }
+  async function deleteItem(item) {
+    if (!item.id) {
+      showToast("Cannot delete \u2014 no document ID");
+      return;
+    }
+    const res = await chrome.runtime.sendMessage({ type: "DELETE_HISTORY", docId: item.id });
+    if (res && res.ok) {
+      if (isPinned(item.text)) {
+        pinnedItems = pinnedItems.filter((p) => p.text !== item.text);
+        await chrome.storage.local.set({ pinnedItems });
+      }
+      showToast("Deleted \u2713");
+    } else {
+      showToast("Delete failed: " + (res?.error || "unknown"));
+    }
+  }
   function updateCounts() {
     const filtered = filterItems(currentHistory);
     allCount.textContent = filtered.length;
@@ -200,6 +216,17 @@
           togglePin(item.text);
         };
         actions.appendChild(removeBtn);
+      }
+      if (activeTab === "all" && item.id) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "clip-action-btn delete-btn";
+        delBtn.title = "Delete";
+        delBtn.textContent = "\u{1F5D1}\uFE0F";
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteItem(item);
+        };
+        actions.appendChild(delBtn);
       }
       meta.appendChild(actions);
       el.appendChild(meta);
