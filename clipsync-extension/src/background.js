@@ -36,6 +36,7 @@ async function pushClipboard(text, sourceDevice) {
     return { ok: false, error: err.message };
   }
 }
+
 function startListening(uid) {
   if (unsubscribe) unsubscribe();
   unsubscribe = onSnapshot(doc(db, "clipboard", uid), async (snap) => {
@@ -57,8 +58,9 @@ function startListening(uid) {
       message: data.text.length > 120 ? data.text.slice(0, 120) + "…" : data.text,
     });
   });
+
   if (unsubscribeHistory) unsubscribeHistory();
-  const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(10));
+  const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
   unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
     chrome.storage.local.set({ history: snap.docs.map((d) => d.data()) });
   });
@@ -82,11 +84,62 @@ signIn().catch((err) => {
   chrome.storage.local.set({ signedIn: false, authError: err.message });
 });
 
-// Clear the badge whenever the popup opens and acknowledges the message.
+// ===== CONTEXT MENU =====
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "clipsync-send",
+    title: "Send via ClipSync",
+    contexts: ["selection"],
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info) => {
+  if (info.menuItemId === "clipsync-send" && info.selectionText) {
+    pushClipboard(info.selectionText, "chrome").then((res) => {
+      if (res.ok) {
+        chrome.action.setBadgeText({ text: "✓" });
+        chrome.action.setBadgeBackgroundColor({ color: "#6366F1" });
+        setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2000);
+      }
+    });
+  }
+});
+
+// ===== KEYBOARD SHORTCUT =====
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "send-clipboard") {
+    try {
+      await ensureOffscreenDocument();
+      // Request clipboard text from offscreen document
+      chrome.runtime.sendMessage({ type: "OFFSCREEN_READ" }, async (response) => {
+        if (response && response.text) {
+          const res = await pushClipboard(response.text, "chrome");
+          if (res.ok) {
+            chrome.action.setBadgeText({ text: "✓" });
+            chrome.action.setBadgeBackgroundColor({ color: "#6366F1" });
+            setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2000);
+
+            chrome.notifications.create({
+              type: "basic",
+              iconUrl: "icon128.png",
+              title: "Clipboard sent via ClipSync",
+              message: response.text.length > 80 ? response.text.slice(0, 80) + "…" : response.text,
+            });
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Keyboard shortcut error:", err);
+    }
+  }
+});
+
+// ===== MESSAGE HANDLER =====
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "CLEAR_BADGE") {
     chrome.action.setBadgeText({ text: "" });
     sendResponse({ ok: true });
+    return;
   }
 
   if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {
@@ -100,5 +153,4 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       .catch((err) => sendResponse({ ok: false, error: err.message }));
     return true; // keep the message channel open for the async response
   }
-}
-);
+});

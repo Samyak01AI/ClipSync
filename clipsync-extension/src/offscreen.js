@@ -30,4 +30,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             .catch((err) => sendResponse({ ok: false, error: err.message }));
         return true;
     }
+
+    // Support reading clipboard for keyboard shortcut
+    if (msg.type === "OFFSCREEN_READ") {
+        navigator.clipboard
+            .readText()
+            .then((text) => sendResponse({ ok: true, text }))
+            .catch((err) => sendResponse({ ok: false, error: err.message }));
+        return true;
+    }
 });

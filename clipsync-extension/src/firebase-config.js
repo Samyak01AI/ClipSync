@@ -4,10 +4,6 @@
 // IMPORTANT: after editing this file you must re-run `npm run build`
 // for the change to take effect (see README.md).
 
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-
-
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDmegbs41OzQ6g_S50W5gesORIOJG_alOk",
   authDomain: "clipsync-ext.firebaseapp.com",

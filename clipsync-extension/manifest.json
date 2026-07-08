@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "ClipSync",
-  "version": "0.1.0",
-  "description": "Sync clipboard content between your phone and this PC.",
+  "version": "1.0.0",
+  "description": "Sync clipboard content between your phone and this PC — instantly, securely, everywhere.",
   "permissions": [
     "storage",
     "notifications",
     "clipboardRead",
     "clipboardWrite",
-    "offscreen"
+    "offscreen",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://firestore.googleapis.com/*",
@@ -21,6 +22,15 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "ClipSync"
+    "default_title": "ClipSync — Clipboard Sync"
+  },
+  "commands": {
+    "send-clipboard": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Send clipboard to other devices"
+    }
   }
 }

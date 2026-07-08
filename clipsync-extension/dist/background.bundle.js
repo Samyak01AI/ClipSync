@@ -312,7 +312,7 @@
     }
   };
   var getDefaultAppConfig = () => getDefaults()?.config;
-  var getExperimentalSetting = (name6) => getDefaults()?.[`_${name6}`];
+  var getExperimentalSetting = (name4) => getDefaults()?.[`_${name4}`];
   var Deferred = class {
     constructor() {
       this.reject = () => {
@@ -457,12 +457,6 @@
         reject(error);
       }
     });
-  }
-  function areCookiesEnabled() {
-    if (typeof navigator === "undefined" || !navigator.cookieEnabled) {
-      return false;
-    }
-    return true;
   }
   var ERROR_NAME = "FirebaseError";
   var FirebaseError = class _FirebaseError extends Error {
@@ -715,21 +709,7 @@
   }
   function noop() {
   }
-  var DEFAULT_INTERVAL_MILLIS = 1e3;
-  var DEFAULT_BACKOFF_FACTOR = 2;
   var MAX_VALUE_MILLIS = 4 * 60 * 60 * 1e3;
-  var RANDOM_FACTOR = 0.5;
-  function calculateBackoffMillis(backoffCount, intervalMillis = DEFAULT_INTERVAL_MILLIS, backoffFactor = DEFAULT_BACKOFF_FACTOR) {
-    const currBaseValue = intervalMillis * Math.pow(backoffFactor, backoffCount);
-    const randomWait = Math.round(
-      // A fraction of the backoff value to add/subtract.
-      // Deviation: changes multiplication order to improve readability.
-      RANDOM_FACTOR * currBaseValue * // A random float (rounded to int by Math.round above) in the range [-1, 1]. Determines
-      // if we add or subtract.
-      (Math.random() - 0.5) * 2
-    );
-    return Math.min(MAX_VALUE_MILLIS, currBaseValue + randomWait);
-  }
   function getModularInstance(service) {
     if (service && service._delegate) {
       return service._delegate;
@@ -760,8 +740,8 @@
      * @param instanceFactory Service factory responsible for creating the public interface
      * @param type whether the service provided by the component is public or private
      */
-    constructor(name6, instanceFactory, type) {
-      this.name = name6;
+    constructor(name4, instanceFactory, type) {
+      this.name = name4;
       this.instanceFactory = instanceFactory;
       this.type = type;
       this.multipleInstances = false;
@@ -788,8 +768,8 @@
   };
   var DEFAULT_ENTRY_NAME = "[DEFAULT]";
   var Provider = class {
-    constructor(name6, container) {
-      this.name = name6;
+    constructor(name4, container) {
+      this.name = name4;
       this.container = container;
       this.component = null;
       this.instances = /* @__PURE__ */ new Map();
@@ -992,8 +972,8 @@
     return component.instantiationMode === "EAGER";
   }
   var ComponentContainer = class {
-    constructor(name6) {
-      this.name = name6;
+    constructor(name4) {
+      this.name = name4;
       this.providers = /* @__PURE__ */ new Map();
     }
     /**
@@ -1026,12 +1006,12 @@
      * Firebase SDKs providing services should extend NameServiceMapping interface to register
      * themselves.
      */
-    getProvider(name6) {
-      if (this.providers.has(name6)) {
-        return this.providers.get(name6);
+    getProvider(name4) {
+      if (this.providers.has(name4)) {
+        return this.providers.get(name4);
       }
-      const provider = new Provider(name6, this);
-      this.providers.set(name6, provider);
+      const provider = new Provider(name4, this);
+      this.providers.set(name4, provider);
       return provider;
     }
     getProviders() {
@@ -1085,8 +1065,8 @@
      *
      * @param name The name that the logs will be associated with
      */
-    constructor(name6) {
-      this.name = name6;
+    constructor(name4) {
+      this.name = name4;
       this._logLevel = defaultLogLevel;
       this._logHandler = defaultLogHandler;
       this._userLogHandler = null;
@@ -1289,8 +1269,8 @@
   var unwrap = (value) => reverseTransformCache.get(value);
 
   // node_modules/idb/build/index.js
-  function openDB(name6, version6, { blocked, upgrade, blocking, terminated } = {}) {
-    const request = indexedDB.open(name6, version6);
+  function openDB(name4, version4, { blocked, upgrade, blocking, terminated } = {}) {
+    const request = indexedDB.open(name4, version4);
     const openPromise = wrap(request);
     if (upgrade) {
       request.addEventListener("upgradeneeded", (event) => {
@@ -1462,12 +1442,12 @@
     }
     return true;
   }
-  function _getProvider(app2, name6) {
+  function _getProvider(app2, name4) {
     const heartbeatController = app2.container.getProvider("heartbeat").getImmediate({ optional: true });
     if (heartbeatController) {
       void heartbeatController.triggerHeartbeat();
     }
-    return app2.container.getProvider(name6);
+    return app2.container.getProvider(name4);
   }
   function _isFirebaseServerApp(obj) {
     if (obj === null || obj === void 0) {
@@ -1592,18 +1572,18 @@
   function initializeApp(_options, rawConfig = {}) {
     let options = _options;
     if (typeof rawConfig !== "object") {
-      const name7 = rawConfig;
-      rawConfig = { name: name7 };
+      const name5 = rawConfig;
+      rawConfig = { name: name5 };
     }
     const config = {
       name: DEFAULT_ENTRY_NAME2,
       automaticDataCollectionEnabled: true,
       ...rawConfig
     };
-    const name6 = config.name;
-    if (typeof name6 !== "string" || !name6) {
+    const name4 = config.name;
+    if (typeof name4 !== "string" || !name4) {
       throw ERROR_FACTORY.create("bad-app-name", {
-        appName: String(name6)
+        appName: String(name4)
       });
     }
     options || (options = getDefaultAppConfig());
@@ -1613,42 +1593,42 @@
         /* AppError.NO_OPTIONS */
       );
     }
-    const existingApp = _apps.get(name6);
+    const existingApp = _apps.get(name4);
     if (existingApp) {
       if (deepEqual(options, existingApp.options) && deepEqual(config, existingApp.config)) {
         return existingApp;
       } else {
-        throw ERROR_FACTORY.create("duplicate-app", { appName: name6 });
+        throw ERROR_FACTORY.create("duplicate-app", { appName: name4 });
       }
     }
-    const container = new ComponentContainer(name6);
+    const container = new ComponentContainer(name4);
     for (const component of _components.values()) {
       container.addComponent(component);
     }
     const newApp = new FirebaseAppImpl(options, config, container);
-    _apps.set(name6, newApp);
+    _apps.set(name4, newApp);
     return newApp;
   }
-  function getApp(name6 = DEFAULT_ENTRY_NAME2) {
-    const app2 = _apps.get(name6);
-    if (!app2 && name6 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
+  function getApp(name4 = DEFAULT_ENTRY_NAME2) {
+    const app2 = _apps.get(name4);
+    if (!app2 && name4 === DEFAULT_ENTRY_NAME2 && getDefaultAppConfig()) {
       return initializeApp();
     }
     if (!app2) {
-      throw ERROR_FACTORY.create("no-app", { appName: name6 });
+      throw ERROR_FACTORY.create("no-app", { appName: name4 });
     }
     return app2;
   }
-  function registerVersion(libraryKeyOrName, version6, variant) {
+  function registerVersion(libraryKeyOrName, version4, variant) {
     let library = PLATFORM_LOG_STRING[libraryKeyOrName] ?? libraryKeyOrName;
     if (variant) {
       library += `-${variant}`;
     }
     const libraryMismatch = library.match(/\s|\//);
-    const versionMismatch = version6.match(/\s|\//);
+    const versionMismatch = version4.match(/\s|\//);
     if (libraryMismatch || versionMismatch) {
       const warning = [
-        `Unable to register library "${library}" with version "${version6}":`
+        `Unable to register library "${library}" with version "${version4}":`
       ];
       if (libraryMismatch) {
         warning.push(`library name "${library}" contains illegal characters (whitespace or "/")`);
@@ -1657,14 +1637,14 @@
         warning.push("and");
       }
       if (versionMismatch) {
-        warning.push(`version name "${version6}" contains illegal characters (whitespace or "/")`);
+        warning.push(`version name "${version4}" contains illegal characters (whitespace or "/")`);
       }
       logger.warn(warning.join(" "));
       return;
     }
     _registerComponent(new Component(
       `${library}-version`,
-      () => ({ library, version: version6 }),
+      () => ({ library, version: version4 }),
       "VERSION"
       /* ComponentType.VERSION */
     ));
@@ -1978,8 +1958,8 @@
       ...prodErrorMap(),
       [code]: message
     };
-    const factory2 = new ErrorFactory("auth", "Firebase", errorMap);
-    return factory2.create(code, {
+    const factory = new ErrorFactory("auth", "Firebase", errorMap);
+    return factory.create(code, {
       appName: auth2.name
     });
   }
@@ -3256,9 +3236,9 @@
       this.persistence = persistence;
       this.auth = auth2;
       this.userKey = userKey;
-      const { config, name: name6 } = this.auth;
-      this.fullUserKey = _persistenceKeyName(this.userKey, config.apiKey, name6);
-      this.fullPersistenceKey = _persistenceKeyName("persistence", config.apiKey, name6);
+      const { config, name: name4 } = this.auth;
+      this.fullUserKey = _persistenceKeyName(this.userKey, config.apiKey, name4);
+      this.fullPersistenceKey = _persistenceKeyName("persistence", config.apiKey, name4);
       this.boundEventHandler = auth2._onStorageEvent.bind(auth2);
       this.persistence._addListener(this.fullUserKey, this.boundEventHandler);
     }
@@ -5599,8 +5579,8 @@
   };
   BrowserLocalPersistence.type = "LOCAL";
   var POLLING_INTERVAL_MS = 1e3;
-  function getDocumentCookie(name6) {
-    const escapedName = name6.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+  function getDocumentCookie(name4) {
+    const escapedName = name4.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
     const matcher = RegExp(`${escapedName}=([^;]+)`);
     return document.cookie.match(matcher)?.[1] ?? null;
   }
@@ -5643,12 +5623,12 @@
       if (!this._isAvailable()) {
         return null;
       }
-      const name6 = getCookieName(key);
+      const name4 = getCookieName(key);
       if (window.cookieStore) {
-        const cookie = await window.cookieStore.get(name6);
+        const cookie = await window.cookieStore.get(name4);
         return cookie?.value;
       }
-      return getDocumentCookie(name6);
+      return getDocumentCookie(name4);
     }
     // Log out by overriding the idToken with a sentinel value of ""
     async _remove(key) {
@@ -5659,8 +5639,8 @@
       if (!existingValue) {
         return;
       }
-      const name6 = getCookieName(key);
-      document.cookie = `${name6}=;Max-Age=34560000;Partitioned;Secure;SameSite=Strict;Path=/;Priority=High`;
+      const name4 = getCookieName(key);
+      document.cookie = `${name4}=;Max-Age=34560000;Partitioned;Secure;SameSite=Strict;Path=/;Priority=High`;
       await fetch(`/__cookies__`, { method: "DELETE" }).catch(() => void 0);
     }
     // Listen for cookie changes, both cookieStore and fallback to polling document.cookie
@@ -5668,14 +5648,14 @@
       if (!this._isAvailable()) {
         return;
       }
-      const name6 = getCookieName(key);
+      const name4 = getCookieName(key);
       if (window.cookieStore) {
         const cb = ((event) => {
-          const changedCookie = event.changed.find((change) => change.name === name6);
+          const changedCookie = event.changed.find((change) => change.name === name4);
           if (changedCookie) {
             listener(changedCookie.value);
           }
-          const deletedCookie = event.deleted.find((change) => change.name === name6);
+          const deletedCookie = event.deleted.find((change) => change.name === name4);
           if (deletedCookie) {
             listener(null);
           }
@@ -5684,9 +5664,9 @@
         this.listenerUnsubscribes.set(listener, unsubscribe3);
         return window.cookieStore.addEventListener("change", cb);
       }
-      let lastValue = getDocumentCookie(name6);
+      let lastValue = getDocumentCookie(name4);
       const interval = setInterval(() => {
-        const currentValue = getDocumentCookie(name6);
+        const currentValue = getDocumentCookie(name4);
         if (currentValue !== lastValue) {
           listener(currentValue);
           lastValue = currentValue;
@@ -12389,15 +12369,15 @@
     // unicodeTable() returns the Unicode RangeTable identified by name
     // and the table of additional fold-equivalent code points.
     // Returns null if |name| does not identify a Unicode character range.
-    static unicodeTable(name6) {
-      if (name6 === "Any") {
+    static unicodeTable(name4) {
+      if (name4 === "Any") {
         return Pair.of(_Parser.ANY_TABLE(), _Parser.ANY_TABLE());
       }
-      if (UnicodeTables.CATEGORIES.has(name6)) {
-        return Pair.of(UnicodeTables.CATEGORIES.get(name6), UnicodeTables.FOLD_CATEGORIES.get(name6));
+      if (UnicodeTables.CATEGORIES.has(name4)) {
+        return Pair.of(UnicodeTables.CATEGORIES.get(name4), UnicodeTables.FOLD_CATEGORIES.get(name4));
       }
-      if (UnicodeTables.SCRIPTS.has(name6)) {
-        return Pair.of(UnicodeTables.SCRIPTS.get(name6), UnicodeTables.FOLD_SCRIPT.get(name6));
+      if (UnicodeTables.SCRIPTS.has(name4)) {
+        return Pair.of(UnicodeTables.SCRIPTS.get(name4), UnicodeTables.FOLD_SCRIPT.get(name4));
       }
       return null;
     }
@@ -12495,12 +12475,12 @@
     // PCRE limits names to 32 bytes.
     // Python rejects names starting with digits.
     // We don't enforce either of those.
-    static isValidCaptureName(name6) {
-      if (name6.length === 0) {
+    static isValidCaptureName(name4) {
+      if (name4.length === 0) {
         return false;
       }
-      for (let i = 0; i < name6.length; i++) {
-        const c = name6.codePointAt(i);
+      for (let i = 0; i < name4.length; i++) {
+        const c = name4.codePointAt(i);
         if (c !== Codepoint.CODES.get("_") && !Utils.isalnum(c)) {
           return false;
         }
@@ -13293,19 +13273,19 @@
         if (end < 0) {
           throw new RE2JSSyntaxException(_Parser.ERR_INVALID_NAMED_CAPTURE, s);
         }
-        const name6 = s.substring(begin, end);
-        t.skipString(name6);
+        const name4 = s.substring(begin, end);
+        t.skipString(name4);
         t.skip(begin + 1);
-        if (!_Parser.isValidCaptureName(name6)) {
+        if (!_Parser.isValidCaptureName(name4)) {
           throw new RE2JSSyntaxException(_Parser.ERR_INVALID_NAMED_CAPTURE, s.substring(0, end + 1));
         }
         const re = this.op(Regexp.Op.LEFT_PAREN);
         re.cap = ++this.numCap;
-        if (this.namedGroups[name6]) {
-          throw new RE2JSSyntaxException(_Parser.ERR_DUPLICATE_NAMED_CAPTURE, name6);
+        if (this.namedGroups[name4]) {
+          throw new RE2JSSyntaxException(_Parser.ERR_DUPLICATE_NAMED_CAPTURE, name4);
         }
-        this.namedGroups[name6] = this.numCap;
-        re.name = name6;
+        this.namedGroups[name4] = this.numCap;
+        re.name = name4;
         return;
       }
       t.skip(2);
@@ -13457,11 +13437,11 @@
       if (i < 0) {
         return false;
       }
-      const name6 = cls.substring(0, i + 2);
-      t.skipString(name6);
-      const g = POSIX_GROUPS.has(name6) ? POSIX_GROUPS.get(name6) : null;
+      const name4 = cls.substring(0, i + 2);
+      t.skipString(name4);
+      const g = POSIX_GROUPS.has(name4) ? POSIX_GROUPS.get(name4) : null;
       if (g === null) {
-        throw new RE2JSSyntaxException(_Parser.ERR_INVALID_CHAR_RANGE, name6);
+        throw new RE2JSSyntaxException(_Parser.ERR_INVALID_CHAR_RANGE, name4);
       }
       cc.appendGroup(g, (this.flags & RE2Flags.FOLD_CASE) !== 0);
       return true;
@@ -13489,9 +13469,9 @@
         throw new RE2JSSyntaxException(_Parser.ERR_INVALID_CHAR_RANGE, t.rest());
       }
       c = t.pop();
-      let name6;
+      let name4;
       if (c !== Codepoint.CODES.get("{")) {
-        name6 = Utils.runeToString(c);
+        name4 = Utils.runeToString(c);
       } else {
         const rest = t.rest();
         const end = rest.indexOf("}");
@@ -13499,15 +13479,15 @@
           t.rewindTo(startPos);
           throw new RE2JSSyntaxException(_Parser.ERR_INVALID_CHAR_RANGE, t.rest());
         }
-        name6 = rest.substring(0, end);
-        t.skipString(name6);
+        name4 = rest.substring(0, end);
+        t.skipString(name4);
         t.skip(1);
       }
-      if (!(name6.length === 0) && name6.codePointAt(0) === Codepoint.CODES.get("^")) {
+      if (!(name4.length === 0) && name4.codePointAt(0) === Codepoint.CODES.get("^")) {
         sign = 0 - sign;
-        name6 = name6.substring(1);
+        name4 = name4.substring(1);
       }
-      const pair = _Parser.unicodeTable(name6);
+      const pair = _Parser.unicodeTable(name4);
       if (pair === null) {
         throw new RE2JSSyntaxException(_Parser.ERR_INVALID_CHAR_RANGE, t.from(startPos));
       }
@@ -13931,9 +13911,9 @@
       this.value = newValue;
     }
     // Atomically sets to the given value and returns true if the current value == the expected value
-    compareAndSet(expect, update2) {
+    compareAndSet(expect, update) {
       if (this.value === expect) {
-        this.value = update2;
+        this.value = update;
         return true;
       }
       return false;
@@ -29097,1149 +29077,6 @@ This typically indicates that your device does not have a healthy Internet conne
     registerVersion(Yt2, Kt2, "esm2020");
   })();
 
-  // node_modules/@firebase/installations/dist/esm/index.esm.js
-  var name4 = "@firebase/installations";
-  var version4 = "0.6.22";
-  var PENDING_TIMEOUT_MS = 1e4;
-  var PACKAGE_VERSION = `w:${version4}`;
-  var INTERNAL_AUTH_VERSION = "FIS_v2";
-  var INSTALLATIONS_API_URL = "https://firebaseinstallations.googleapis.com/v1";
-  var TOKEN_EXPIRATION_BUFFER = 60 * 60 * 1e3;
-  var SERVICE = "installations";
-  var SERVICE_NAME = "Installations";
-  var ERROR_DESCRIPTION_MAP = {
-    [
-      "missing-app-config-values"
-      /* ErrorCode.MISSING_APP_CONFIG_VALUES */
-    ]: 'Missing App configuration value: "{$valueName}"',
-    [
-      "not-registered"
-      /* ErrorCode.NOT_REGISTERED */
-    ]: "Firebase Installation is not registered.",
-    [
-      "installation-not-found"
-      /* ErrorCode.INSTALLATION_NOT_FOUND */
-    ]: "Firebase Installation not found.",
-    [
-      "request-failed"
-      /* ErrorCode.REQUEST_FAILED */
-    ]: '{$requestName} request failed with error "{$serverCode} {$serverStatus}: {$serverMessage}"',
-    [
-      "app-offline"
-      /* ErrorCode.APP_OFFLINE */
-    ]: "Could not process request. Application offline.",
-    [
-      "delete-pending-registration"
-      /* ErrorCode.DELETE_PENDING_REGISTRATION */
-    ]: "Can't delete installation while there is a pending registration request."
-  };
-  var ERROR_FACTORY2 = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
-  function isServerError(error) {
-    return error instanceof FirebaseError && error.code.includes(
-      "request-failed"
-      /* ErrorCode.REQUEST_FAILED */
-    );
-  }
-  function getInstallationsEndpoint({ projectId }) {
-    return `${INSTALLATIONS_API_URL}/projects/${projectId}/installations`;
-  }
-  function extractAuthTokenInfoFromResponse(response) {
-    return {
-      token: response.token,
-      requestStatus: 2,
-      expiresIn: getExpiresInFromResponseExpiresIn(response.expiresIn),
-      creationTime: Date.now()
-    };
-  }
-  async function getErrorFromResponse(requestName, response) {
-    const responseJson = await response.json();
-    const errorData = responseJson.error;
-    return ERROR_FACTORY2.create("request-failed", {
-      requestName,
-      serverCode: errorData.code,
-      serverMessage: errorData.message,
-      serverStatus: errorData.status
-    });
-  }
-  function getHeaders({ apiKey }) {
-    return new Headers({
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-goog-api-key": apiKey
-    });
-  }
-  function getHeadersWithAuth(appConfig, { refreshToken }) {
-    const headers = getHeaders(appConfig);
-    headers.append("Authorization", getAuthorizationHeader(refreshToken));
-    return headers;
-  }
-  async function retryIfServerError(fn2) {
-    const result = await fn2();
-    if (result.status >= 500 && result.status < 600) {
-      return fn2();
-    }
-    return result;
-  }
-  function getExpiresInFromResponseExpiresIn(responseExpiresIn) {
-    return Number(responseExpiresIn.replace("s", "000"));
-  }
-  function getAuthorizationHeader(refreshToken) {
-    return `${INTERNAL_AUTH_VERSION} ${refreshToken}`;
-  }
-  async function createInstallationRequest({ appConfig, heartbeatServiceProvider }, { fid }) {
-    const endpoint = getInstallationsEndpoint(appConfig);
-    const headers = getHeaders(appConfig);
-    const heartbeatService = heartbeatServiceProvider.getImmediate({
-      optional: true
-    });
-    if (heartbeatService) {
-      const heartbeatsHeader = await heartbeatService.getHeartbeatsHeader();
-      if (heartbeatsHeader) {
-        headers.append("x-firebase-client", heartbeatsHeader);
-      }
-    }
-    const body = {
-      fid,
-      authVersion: INTERNAL_AUTH_VERSION,
-      appId: appConfig.appId,
-      sdkVersion: PACKAGE_VERSION
-    };
-    const request = {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body)
-    };
-    const response = await retryIfServerError(() => fetch(endpoint, request));
-    if (response.ok) {
-      const responseValue = await response.json();
-      const registeredInstallationEntry = {
-        fid: responseValue.fid || fid,
-        registrationStatus: 2,
-        refreshToken: responseValue.refreshToken,
-        authToken: extractAuthTokenInfoFromResponse(responseValue.authToken)
-      };
-      return registeredInstallationEntry;
-    } else {
-      throw await getErrorFromResponse("Create Installation", response);
-    }
-  }
-  function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
-  function bufferToBase64UrlSafe(array2) {
-    const b64 = btoa(String.fromCharCode(...array2));
-    return b64.replace(/\+/g, "-").replace(/\//g, "_");
-  }
-  var VALID_FID_PATTERN = /^[cdef][\w-]{21}$/;
-  var INVALID_FID = "";
-  function generateFid() {
-    try {
-      const fidByteArray = new Uint8Array(17);
-      const crypto2 = self.crypto || self.msCrypto;
-      crypto2.getRandomValues(fidByteArray);
-      fidByteArray[0] = 112 + fidByteArray[0] % 16;
-      const fid = encode(fidByteArray);
-      return VALID_FID_PATTERN.test(fid) ? fid : INVALID_FID;
-    } catch {
-      return INVALID_FID;
-    }
-  }
-  function encode(fidByteArray) {
-    const b64String = bufferToBase64UrlSafe(fidByteArray);
-    return b64String.substr(0, 22);
-  }
-  function getKey(appConfig) {
-    return `${appConfig.appName}!${appConfig.appId}`;
-  }
-  var fidChangeCallbacks = /* @__PURE__ */ new Map();
-  function fidChanged(appConfig, fid) {
-    const key = getKey(appConfig);
-    callFidChangeCallbacks(key, fid);
-    broadcastFidChange(key, fid);
-  }
-  function callFidChangeCallbacks(key, fid) {
-    const callbacks = fidChangeCallbacks.get(key);
-    if (!callbacks) {
-      return;
-    }
-    for (const callback of callbacks) {
-      callback(fid);
-    }
-  }
-  function broadcastFidChange(key, fid) {
-    const channel = getBroadcastChannel();
-    if (channel) {
-      channel.postMessage({ key, fid });
-    }
-    closeBroadcastChannel();
-  }
-  var broadcastChannel = null;
-  function getBroadcastChannel() {
-    if (!broadcastChannel && "BroadcastChannel" in self) {
-      broadcastChannel = new BroadcastChannel("[Firebase] FID Change");
-      broadcastChannel.onmessage = (e) => {
-        callFidChangeCallbacks(e.data.key, e.data.fid);
-      };
-    }
-    return broadcastChannel;
-  }
-  function closeBroadcastChannel() {
-    if (fidChangeCallbacks.size === 0 && broadcastChannel) {
-      broadcastChannel.close();
-      broadcastChannel = null;
-    }
-  }
-  var DATABASE_NAME = "firebase-installations-database";
-  var DATABASE_VERSION = 1;
-  var OBJECT_STORE_NAME = "firebase-installations-store";
-  var dbPromise2 = null;
-  function getDbPromise2() {
-    if (!dbPromise2) {
-      dbPromise2 = openDB(DATABASE_NAME, DATABASE_VERSION, {
-        upgrade: (db2, oldVersion) => {
-          switch (oldVersion) {
-            case 0:
-              db2.createObjectStore(OBJECT_STORE_NAME);
-          }
-        }
-      });
-    }
-    return dbPromise2;
-  }
-  async function set(appConfig, value) {
-    const key = getKey(appConfig);
-    const db2 = await getDbPromise2();
-    const tx = db2.transaction(OBJECT_STORE_NAME, "readwrite");
-    const objectStore = tx.objectStore(OBJECT_STORE_NAME);
-    const oldValue = await objectStore.get(key);
-    await objectStore.put(value, key);
-    await tx.done;
-    if (!oldValue || oldValue.fid !== value.fid) {
-      fidChanged(appConfig, value.fid);
-    }
-    return value;
-  }
-  async function remove(appConfig) {
-    const key = getKey(appConfig);
-    const db2 = await getDbPromise2();
-    const tx = db2.transaction(OBJECT_STORE_NAME, "readwrite");
-    await tx.objectStore(OBJECT_STORE_NAME).delete(key);
-    await tx.done;
-  }
-  async function update(appConfig, updateFn) {
-    const key = getKey(appConfig);
-    const db2 = await getDbPromise2();
-    const tx = db2.transaction(OBJECT_STORE_NAME, "readwrite");
-    const store = tx.objectStore(OBJECT_STORE_NAME);
-    const oldValue = await store.get(key);
-    const newValue = updateFn(oldValue);
-    if (newValue === void 0) {
-      await store.delete(key);
-    } else {
-      await store.put(newValue, key);
-    }
-    await tx.done;
-    if (newValue && (!oldValue || oldValue.fid !== newValue.fid)) {
-      fidChanged(appConfig, newValue.fid);
-    }
-    return newValue;
-  }
-  async function getInstallationEntry(installations) {
-    let registrationPromise;
-    const installationEntry = await update(installations.appConfig, (oldEntry) => {
-      const installationEntry2 = updateOrCreateInstallationEntry(oldEntry);
-      const entryWithPromise = triggerRegistrationIfNecessary(installations, installationEntry2);
-      registrationPromise = entryWithPromise.registrationPromise;
-      return entryWithPromise.installationEntry;
-    });
-    if (installationEntry.fid === INVALID_FID) {
-      return { installationEntry: await registrationPromise };
-    }
-    return {
-      installationEntry,
-      registrationPromise
-    };
-  }
-  function updateOrCreateInstallationEntry(oldEntry) {
-    const entry = oldEntry || {
-      fid: generateFid(),
-      registrationStatus: 0
-      /* RequestStatus.NOT_STARTED */
-    };
-    return clearTimedOutRequest(entry);
-  }
-  function triggerRegistrationIfNecessary(installations, installationEntry) {
-    if (installationEntry.registrationStatus === 0) {
-      if (!navigator.onLine) {
-        const registrationPromiseWithError = Promise.reject(ERROR_FACTORY2.create(
-          "app-offline"
-          /* ErrorCode.APP_OFFLINE */
-        ));
-        return {
-          installationEntry,
-          registrationPromise: registrationPromiseWithError
-        };
-      }
-      const inProgressEntry = {
-        fid: installationEntry.fid,
-        registrationStatus: 1,
-        registrationTime: Date.now()
-      };
-      const registrationPromise = registerInstallation(installations, inProgressEntry);
-      return { installationEntry: inProgressEntry, registrationPromise };
-    } else if (installationEntry.registrationStatus === 1) {
-      return {
-        installationEntry,
-        registrationPromise: waitUntilFidRegistration(installations)
-      };
-    } else {
-      return { installationEntry };
-    }
-  }
-  async function registerInstallation(installations, installationEntry) {
-    try {
-      const registeredInstallationEntry = await createInstallationRequest(installations, installationEntry);
-      return set(installations.appConfig, registeredInstallationEntry);
-    } catch (e) {
-      if (isServerError(e) && e.customData.serverCode === 409) {
-        await remove(installations.appConfig);
-      } else {
-        await set(installations.appConfig, {
-          fid: installationEntry.fid,
-          registrationStatus: 0
-          /* RequestStatus.NOT_STARTED */
-        });
-      }
-      throw e;
-    }
-  }
-  async function waitUntilFidRegistration(installations) {
-    let entry = await updateInstallationRequest(installations.appConfig);
-    while (entry.registrationStatus === 1) {
-      await sleep(100);
-      entry = await updateInstallationRequest(installations.appConfig);
-    }
-    if (entry.registrationStatus === 0) {
-      const { installationEntry, registrationPromise } = await getInstallationEntry(installations);
-      if (registrationPromise) {
-        return registrationPromise;
-      } else {
-        return installationEntry;
-      }
-    }
-    return entry;
-  }
-  function updateInstallationRequest(appConfig) {
-    return update(appConfig, (oldEntry) => {
-      if (!oldEntry) {
-        throw ERROR_FACTORY2.create(
-          "installation-not-found"
-          /* ErrorCode.INSTALLATION_NOT_FOUND */
-        );
-      }
-      return clearTimedOutRequest(oldEntry);
-    });
-  }
-  function clearTimedOutRequest(entry) {
-    if (hasInstallationRequestTimedOut(entry)) {
-      return {
-        fid: entry.fid,
-        registrationStatus: 0
-        /* RequestStatus.NOT_STARTED */
-      };
-    }
-    return entry;
-  }
-  function hasInstallationRequestTimedOut(installationEntry) {
-    return installationEntry.registrationStatus === 1 && installationEntry.registrationTime + PENDING_TIMEOUT_MS < Date.now();
-  }
-  async function generateAuthTokenRequest({ appConfig, heartbeatServiceProvider }, installationEntry) {
-    const endpoint = getGenerateAuthTokenEndpoint(appConfig, installationEntry);
-    const headers = getHeadersWithAuth(appConfig, installationEntry);
-    const heartbeatService = heartbeatServiceProvider.getImmediate({
-      optional: true
-    });
-    if (heartbeatService) {
-      const heartbeatsHeader = await heartbeatService.getHeartbeatsHeader();
-      if (heartbeatsHeader) {
-        headers.append("x-firebase-client", heartbeatsHeader);
-      }
-    }
-    const body = {
-      installation: {
-        sdkVersion: PACKAGE_VERSION,
-        appId: appConfig.appId
-      }
-    };
-    const request = {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body)
-    };
-    const response = await retryIfServerError(() => fetch(endpoint, request));
-    if (response.ok) {
-      const responseValue = await response.json();
-      const completedAuthToken = extractAuthTokenInfoFromResponse(responseValue);
-      return completedAuthToken;
-    } else {
-      throw await getErrorFromResponse("Generate Auth Token", response);
-    }
-  }
-  function getGenerateAuthTokenEndpoint(appConfig, { fid }) {
-    return `${getInstallationsEndpoint(appConfig)}/${fid}/authTokens:generate`;
-  }
-  async function refreshAuthToken(installations, forceRefresh = false) {
-    let tokenPromise;
-    const entry = await update(installations.appConfig, (oldEntry) => {
-      if (!isEntryRegistered(oldEntry)) {
-        throw ERROR_FACTORY2.create(
-          "not-registered"
-          /* ErrorCode.NOT_REGISTERED */
-        );
-      }
-      const oldAuthToken = oldEntry.authToken;
-      if (!forceRefresh && isAuthTokenValid(oldAuthToken)) {
-        return oldEntry;
-      } else if (oldAuthToken.requestStatus === 1) {
-        tokenPromise = waitUntilAuthTokenRequest(installations, forceRefresh);
-        return oldEntry;
-      } else {
-        if (!navigator.onLine) {
-          throw ERROR_FACTORY2.create(
-            "app-offline"
-            /* ErrorCode.APP_OFFLINE */
-          );
-        }
-        const inProgressEntry = makeAuthTokenRequestInProgressEntry(oldEntry);
-        tokenPromise = fetchAuthTokenFromServer(installations, inProgressEntry);
-        return inProgressEntry;
-      }
-    });
-    const authToken = tokenPromise ? await tokenPromise : entry.authToken;
-    return authToken;
-  }
-  async function waitUntilAuthTokenRequest(installations, forceRefresh) {
-    let entry = await updateAuthTokenRequest(installations.appConfig);
-    while (entry.authToken.requestStatus === 1) {
-      await sleep(100);
-      entry = await updateAuthTokenRequest(installations.appConfig);
-    }
-    const authToken = entry.authToken;
-    if (authToken.requestStatus === 0) {
-      return refreshAuthToken(installations, forceRefresh);
-    } else {
-      return authToken;
-    }
-  }
-  function updateAuthTokenRequest(appConfig) {
-    return update(appConfig, (oldEntry) => {
-      if (!isEntryRegistered(oldEntry)) {
-        throw ERROR_FACTORY2.create(
-          "not-registered"
-          /* ErrorCode.NOT_REGISTERED */
-        );
-      }
-      const oldAuthToken = oldEntry.authToken;
-      if (hasAuthTokenRequestTimedOut(oldAuthToken)) {
-        return {
-          ...oldEntry,
-          authToken: {
-            requestStatus: 0
-            /* RequestStatus.NOT_STARTED */
-          }
-        };
-      }
-      return oldEntry;
-    });
-  }
-  async function fetchAuthTokenFromServer(installations, installationEntry) {
-    try {
-      const authToken = await generateAuthTokenRequest(installations, installationEntry);
-      const updatedInstallationEntry = {
-        ...installationEntry,
-        authToken
-      };
-      await set(installations.appConfig, updatedInstallationEntry);
-      return authToken;
-    } catch (e) {
-      if (isServerError(e) && (e.customData.serverCode === 401 || e.customData.serverCode === 404)) {
-        await remove(installations.appConfig);
-      } else {
-        const updatedInstallationEntry = {
-          ...installationEntry,
-          authToken: {
-            requestStatus: 0
-            /* RequestStatus.NOT_STARTED */
-          }
-        };
-        await set(installations.appConfig, updatedInstallationEntry);
-      }
-      throw e;
-    }
-  }
-  function isEntryRegistered(installationEntry) {
-    return installationEntry !== void 0 && installationEntry.registrationStatus === 2;
-  }
-  function isAuthTokenValid(authToken) {
-    return authToken.requestStatus === 2 && !isAuthTokenExpired(authToken);
-  }
-  function isAuthTokenExpired(authToken) {
-    const now = Date.now();
-    return now < authToken.creationTime || authToken.creationTime + authToken.expiresIn < now + TOKEN_EXPIRATION_BUFFER;
-  }
-  function makeAuthTokenRequestInProgressEntry(oldEntry) {
-    const inProgressAuthToken = {
-      requestStatus: 1,
-      requestTime: Date.now()
-    };
-    return {
-      ...oldEntry,
-      authToken: inProgressAuthToken
-    };
-  }
-  function hasAuthTokenRequestTimedOut(authToken) {
-    return authToken.requestStatus === 1 && authToken.requestTime + PENDING_TIMEOUT_MS < Date.now();
-  }
-  async function getId(installations) {
-    const installationsImpl = installations;
-    const { installationEntry, registrationPromise } = await getInstallationEntry(installationsImpl);
-    if (registrationPromise) {
-      registrationPromise.catch(console.error);
-    } else {
-      refreshAuthToken(installationsImpl).catch(console.error);
-    }
-    return installationEntry.fid;
-  }
-  async function getToken(installations, forceRefresh = false) {
-    const installationsImpl = installations;
-    await completeInstallationRegistration(installationsImpl);
-    const authToken = await refreshAuthToken(installationsImpl, forceRefresh);
-    return authToken.token;
-  }
-  async function completeInstallationRegistration(installations) {
-    const { registrationPromise } = await getInstallationEntry(installations);
-    if (registrationPromise) {
-      await registrationPromise;
-    }
-  }
-  function extractAppConfig(app2) {
-    if (!app2 || !app2.options) {
-      throw getMissingValueError("App Configuration");
-    }
-    if (!app2.name) {
-      throw getMissingValueError("App Name");
-    }
-    const configKeys = [
-      "projectId",
-      "apiKey",
-      "appId"
-    ];
-    for (const keyName of configKeys) {
-      if (!app2.options[keyName]) {
-        throw getMissingValueError(keyName);
-      }
-    }
-    return {
-      appName: app2.name,
-      projectId: app2.options.projectId,
-      apiKey: app2.options.apiKey,
-      appId: app2.options.appId
-    };
-  }
-  function getMissingValueError(valueName) {
-    return ERROR_FACTORY2.create("missing-app-config-values", {
-      valueName
-    });
-  }
-  var INSTALLATIONS_NAME = "installations";
-  var INSTALLATIONS_NAME_INTERNAL = "installations-internal";
-  var publicFactory = (container) => {
-    const app2 = container.getProvider("app").getImmediate();
-    const appConfig = extractAppConfig(app2);
-    const heartbeatServiceProvider = _getProvider(app2, "heartbeat");
-    const installationsImpl = {
-      app: app2,
-      appConfig,
-      heartbeatServiceProvider,
-      _delete: () => Promise.resolve()
-    };
-    return installationsImpl;
-  };
-  var internalFactory = (container) => {
-    const app2 = container.getProvider("app").getImmediate();
-    const installations = _getProvider(app2, INSTALLATIONS_NAME).getImmediate();
-    const installationsInternal = {
-      getId: () => getId(installations),
-      getToken: (forceRefresh) => getToken(installations, forceRefresh)
-    };
-    return installationsInternal;
-  };
-  function registerInstallations() {
-    _registerComponent(new Component(
-      INSTALLATIONS_NAME,
-      publicFactory,
-      "PUBLIC"
-      /* ComponentType.PUBLIC */
-    ));
-    _registerComponent(new Component(
-      INSTALLATIONS_NAME_INTERNAL,
-      internalFactory,
-      "PRIVATE"
-      /* ComponentType.PRIVATE */
-    ));
-  }
-  registerInstallations();
-  registerVersion(name4, version4);
-  registerVersion(name4, version4, "esm2020");
-
-  // node_modules/@firebase/analytics/dist/esm/index.esm.js
-  var ANALYTICS_TYPE = "analytics";
-  var GA_FID_KEY = "firebase_id";
-  var ORIGIN_KEY = "origin";
-  var FETCH_TIMEOUT_MILLIS = 60 * 1e3;
-  var DYNAMIC_CONFIG_URL = "https://firebase.googleapis.com/v1alpha/projects/-/apps/{app-id}/webConfig";
-  var GTAG_URL = "https://www.googletagmanager.com/gtag/js";
-  var logger2 = new Logger("@firebase/analytics");
-  var ERRORS2 = {
-    [
-      "already-exists"
-      /* AnalyticsError.ALREADY_EXISTS */
-    ]: "A Firebase Analytics instance with the appId {$id}  already exists. Only one Firebase Analytics instance can be created for each appId.",
-    [
-      "already-initialized"
-      /* AnalyticsError.ALREADY_INITIALIZED */
-    ]: "initializeAnalytics() cannot be called again with different options than those it was initially called with. It can be called again with the same options to return the existing instance, or getAnalytics() can be used to get a reference to the already-initialized instance.",
-    [
-      "already-initialized-settings"
-      /* AnalyticsError.ALREADY_INITIALIZED_SETTINGS */
-    ]: "Firebase Analytics has already been initialized.settings() must be called before initializing any Analytics instanceor it will have no effect.",
-    [
-      "interop-component-reg-failed"
-      /* AnalyticsError.INTEROP_COMPONENT_REG_FAILED */
-    ]: "Firebase Analytics Interop Component failed to instantiate: {$reason}",
-    [
-      "invalid-analytics-context"
-      /* AnalyticsError.INVALID_ANALYTICS_CONTEXT */
-    ]: "Firebase Analytics is not supported in this environment. Wrap initialization of analytics in analytics.isSupported() to prevent initialization in unsupported environments. Details: {$errorInfo}",
-    [
-      "indexeddb-unavailable"
-      /* AnalyticsError.INDEXEDDB_UNAVAILABLE */
-    ]: "IndexedDB unavailable or restricted in this environment. Wrap initialization of analytics in analytics.isSupported() to prevent initialization in unsupported environments. Details: {$errorInfo}",
-    [
-      "fetch-throttle"
-      /* AnalyticsError.FETCH_THROTTLE */
-    ]: "The config fetch request timed out while in an exponential backoff state. Unix timestamp in milliseconds when fetch request throttling ends: {$throttleEndTimeMillis}.",
-    [
-      "config-fetch-failed"
-      /* AnalyticsError.CONFIG_FETCH_FAILED */
-    ]: "Dynamic config fetch failed: [{$httpStatus}] {$responseMessage}",
-    [
-      "no-api-key"
-      /* AnalyticsError.NO_API_KEY */
-    ]: 'The "apiKey" field is empty in the local Firebase config. Firebase Analytics requires this field tocontain a valid API key.',
-    [
-      "no-app-id"
-      /* AnalyticsError.NO_APP_ID */
-    ]: 'The "appId" field is empty in the local Firebase config. Firebase Analytics requires this field tocontain a valid app ID.',
-    [
-      "no-client-id"
-      /* AnalyticsError.NO_CLIENT_ID */
-    ]: 'The "client_id" field is empty.',
-    [
-      "invalid-gtag-resource"
-      /* AnalyticsError.INVALID_GTAG_RESOURCE */
-    ]: "Trusted Types detected an invalid gtag resource: {$gtagURL}."
-  };
-  var ERROR_FACTORY3 = new ErrorFactory("analytics", "Analytics", ERRORS2);
-  function createGtagTrustedTypesScriptURL(url) {
-    if (!url.startsWith(GTAG_URL)) {
-      const err = ERROR_FACTORY3.create("invalid-gtag-resource", {
-        gtagURL: url
-      });
-      logger2.warn(err.message);
-      return "";
-    }
-    return url;
-  }
-  function promiseAllSettled(promises) {
-    return Promise.all(promises.map((promise) => promise.catch((e) => e)));
-  }
-  function createTrustedTypesPolicy(policyName, policyOptions) {
-    let trustedTypesPolicy;
-    if (window.trustedTypes) {
-      trustedTypesPolicy = window.trustedTypes.createPolicy(policyName, policyOptions);
-    }
-    return trustedTypesPolicy;
-  }
-  function insertScriptTag(dataLayerName2, measurementId) {
-    const trustedTypesPolicy = createTrustedTypesPolicy("firebase-js-sdk-policy", {
-      createScriptURL: createGtagTrustedTypesScriptURL
-    });
-    const script = document.createElement("script");
-    const gtagScriptURL = `${GTAG_URL}?l=${dataLayerName2}&id=${measurementId}`;
-    script.src = trustedTypesPolicy ? trustedTypesPolicy?.createScriptURL(gtagScriptURL) : gtagScriptURL;
-    script.async = true;
-    document.head.appendChild(script);
-  }
-  function getOrCreateDataLayer(dataLayerName2) {
-    let dataLayer = [];
-    if (Array.isArray(window[dataLayerName2])) {
-      dataLayer = window[dataLayerName2];
-    } else {
-      window[dataLayerName2] = dataLayer;
-    }
-    return dataLayer;
-  }
-  async function gtagOnConfig(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementIdToAppId2, measurementId, gtagParams) {
-    const correspondingAppId = measurementIdToAppId2[measurementId];
-    try {
-      if (correspondingAppId) {
-        await initializationPromisesMap2[correspondingAppId];
-      } else {
-        const dynamicConfigResults = await promiseAllSettled(dynamicConfigPromisesList2);
-        const foundConfig = dynamicConfigResults.find((config) => config.measurementId === measurementId);
-        if (foundConfig) {
-          await initializationPromisesMap2[foundConfig.appId];
-        }
-      }
-    } catch (e) {
-      logger2.error(e);
-    }
-    gtagCore("config", measurementId, gtagParams);
-  }
-  async function gtagOnEvent(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementId, gtagParams) {
-    try {
-      let initializationPromisesToWaitFor = [];
-      if (gtagParams && gtagParams["send_to"]) {
-        let gaSendToList = gtagParams["send_to"];
-        if (!Array.isArray(gaSendToList)) {
-          gaSendToList = [gaSendToList];
-        }
-        const dynamicConfigResults = await promiseAllSettled(dynamicConfigPromisesList2);
-        for (const sendToId of gaSendToList) {
-          const foundConfig = dynamicConfigResults.find((config) => config.measurementId === sendToId);
-          const initializationPromise = foundConfig && initializationPromisesMap2[foundConfig.appId];
-          if (initializationPromise) {
-            initializationPromisesToWaitFor.push(initializationPromise);
-          } else {
-            initializationPromisesToWaitFor = [];
-            break;
-          }
-        }
-      }
-      if (initializationPromisesToWaitFor.length === 0) {
-        initializationPromisesToWaitFor = Object.values(initializationPromisesMap2);
-      }
-      await Promise.all(initializationPromisesToWaitFor);
-      gtagCore("event", measurementId, gtagParams || {});
-    } catch (e) {
-      logger2.error(e);
-    }
-  }
-  function wrapGtag(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementIdToAppId2) {
-    async function gtagWrapper(command, ...args) {
-      try {
-        if (command === "event") {
-          const [measurementId, gtagParams] = args;
-          await gtagOnEvent(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementId, gtagParams);
-        } else if (command === "config") {
-          const [measurementId, gtagParams] = args;
-          await gtagOnConfig(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementIdToAppId2, measurementId, gtagParams);
-        } else if (command === "consent") {
-          const [consentAction, gtagParams] = args;
-          gtagCore("consent", consentAction, gtagParams);
-        } else if (command === "get") {
-          const [measurementId, fieldName, callback] = args;
-          gtagCore("get", measurementId, fieldName, callback);
-        } else if (command === "set") {
-          const [customParams] = args;
-          gtagCore("set", customParams);
-        } else {
-          gtagCore(command, ...args);
-        }
-      } catch (e) {
-        logger2.error(e);
-      }
-    }
-    return gtagWrapper;
-  }
-  function wrapOrCreateGtag(initializationPromisesMap2, dynamicConfigPromisesList2, measurementIdToAppId2, dataLayerName2, gtagFunctionName) {
-    let gtagCore = function(..._args) {
-      window[dataLayerName2].push(arguments);
-    };
-    if (window[gtagFunctionName] && typeof window[gtagFunctionName] === "function") {
-      gtagCore = window[gtagFunctionName];
-    }
-    window[gtagFunctionName] = wrapGtag(gtagCore, initializationPromisesMap2, dynamicConfigPromisesList2, measurementIdToAppId2);
-    return {
-      gtagCore,
-      wrappedGtag: window[gtagFunctionName]
-    };
-  }
-  function findGtagScriptOnPage(dataLayerName2) {
-    const scriptTags = window.document.getElementsByTagName("script");
-    for (const tag of Object.values(scriptTags)) {
-      if (tag.src && tag.src.includes(GTAG_URL) && tag.src.includes(dataLayerName2)) {
-        return tag;
-      }
-    }
-    return null;
-  }
-  var LONG_RETRY_FACTOR = 30;
-  var BASE_INTERVAL_MILLIS = 1e3;
-  var RetryData = class {
-    constructor(throttleMetadata = {}, intervalMillis = BASE_INTERVAL_MILLIS) {
-      this.throttleMetadata = throttleMetadata;
-      this.intervalMillis = intervalMillis;
-    }
-    getThrottleMetadata(appId) {
-      return this.throttleMetadata[appId];
-    }
-    setThrottleMetadata(appId, metadata) {
-      this.throttleMetadata[appId] = metadata;
-    }
-    deleteThrottleMetadata(appId) {
-      delete this.throttleMetadata[appId];
-    }
-  };
-  var defaultRetryData = new RetryData();
-  function getHeaders2(apiKey) {
-    return new Headers({
-      Accept: "application/json",
-      "x-goog-api-key": apiKey
-    });
-  }
-  async function fetchDynamicConfig(appFields) {
-    const { appId, apiKey } = appFields;
-    const request = {
-      method: "GET",
-      headers: getHeaders2(apiKey)
-    };
-    const appUrl = DYNAMIC_CONFIG_URL.replace("{app-id}", appId);
-    const response = await fetch(appUrl, request);
-    if (response.status !== 200 && response.status !== 304) {
-      let errorMessage = "";
-      try {
-        const jsonResponse = await response.json();
-        if (jsonResponse.error?.message) {
-          errorMessage = jsonResponse.error.message;
-        }
-      } catch (_ignored) {
-      }
-      throw ERROR_FACTORY3.create("config-fetch-failed", {
-        httpStatus: response.status,
-        responseMessage: errorMessage
-      });
-    }
-    return response.json();
-  }
-  async function fetchDynamicConfigWithRetry(app2, retryData = defaultRetryData, timeoutMillis) {
-    const { appId, apiKey, measurementId } = app2.options;
-    if (!appId) {
-      throw ERROR_FACTORY3.create(
-        "no-app-id"
-        /* AnalyticsError.NO_APP_ID */
-      );
-    }
-    if (!apiKey) {
-      if (measurementId) {
-        return {
-          measurementId,
-          appId
-        };
-      }
-      throw ERROR_FACTORY3.create(
-        "no-api-key"
-        /* AnalyticsError.NO_API_KEY */
-      );
-    }
-    const throttleMetadata = retryData.getThrottleMetadata(appId) || {
-      backoffCount: 0,
-      throttleEndTimeMillis: Date.now()
-    };
-    const signal = new AnalyticsAbortSignal();
-    setTimeout(async () => {
-      signal.abort();
-    }, timeoutMillis !== void 0 ? timeoutMillis : FETCH_TIMEOUT_MILLIS);
-    return attemptFetchDynamicConfigWithRetry({ appId, apiKey, measurementId }, throttleMetadata, signal, retryData);
-  }
-  async function attemptFetchDynamicConfigWithRetry(appFields, { throttleEndTimeMillis, backoffCount }, signal, retryData = defaultRetryData) {
-    const { appId, measurementId } = appFields;
-    try {
-      await setAbortableTimeout(signal, throttleEndTimeMillis);
-    } catch (e) {
-      if (measurementId) {
-        logger2.warn(`Timed out fetching this Firebase app's measurement ID from the server. Falling back to the measurement ID ${measurementId} provided in the "measurementId" field in the local Firebase config. [${e?.message}]`);
-        return { appId, measurementId };
-      }
-      throw e;
-    }
-    try {
-      const response = await fetchDynamicConfig(appFields);
-      retryData.deleteThrottleMetadata(appId);
-      return response;
-    } catch (e) {
-      const error = e;
-      if (!isRetriableError(error)) {
-        retryData.deleteThrottleMetadata(appId);
-        if (measurementId) {
-          logger2.warn(`Failed to fetch this Firebase app's measurement ID from the server. Falling back to the measurement ID ${measurementId} provided in the "measurementId" field in the local Firebase config. [${error?.message}]`);
-          return { appId, measurementId };
-        } else {
-          throw e;
-        }
-      }
-      const backoffMillis = Number(error?.customData?.httpStatus) === 503 ? calculateBackoffMillis(backoffCount, retryData.intervalMillis, LONG_RETRY_FACTOR) : calculateBackoffMillis(backoffCount, retryData.intervalMillis);
-      const throttleMetadata = {
-        throttleEndTimeMillis: Date.now() + backoffMillis,
-        backoffCount: backoffCount + 1
-      };
-      retryData.setThrottleMetadata(appId, throttleMetadata);
-      logger2.debug(`Calling attemptFetch again in ${backoffMillis} millis`);
-      return attemptFetchDynamicConfigWithRetry(appFields, throttleMetadata, signal, retryData);
-    }
-  }
-  function setAbortableTimeout(signal, throttleEndTimeMillis) {
-    return new Promise((resolve, reject) => {
-      const backoffMillis = Math.max(throttleEndTimeMillis - Date.now(), 0);
-      const timeout = setTimeout(resolve, backoffMillis);
-      signal.addEventListener(() => {
-        clearTimeout(timeout);
-        reject(ERROR_FACTORY3.create("fetch-throttle", {
-          throttleEndTimeMillis
-        }));
-      });
-    });
-  }
-  function isRetriableError(e) {
-    if (!(e instanceof FirebaseError) || !e.customData) {
-      return false;
-    }
-    const httpStatus = Number(e.customData["httpStatus"]);
-    return httpStatus === 429 || httpStatus === 500 || httpStatus === 503 || httpStatus === 504;
-  }
-  var AnalyticsAbortSignal = class {
-    constructor() {
-      this.listeners = [];
-    }
-    addEventListener(listener) {
-      this.listeners.push(listener);
-    }
-    abort() {
-      this.listeners.forEach((listener) => listener());
-    }
-  };
-  var defaultEventParametersForInit;
-  async function logEvent$1(gtagFunction, initializationPromise, eventName, eventParams, options) {
-    if (options && options.global) {
-      gtagFunction("event", eventName, eventParams);
-      return;
-    } else {
-      const measurementId = await initializationPromise;
-      const params = {
-        ...eventParams,
-        "send_to": measurementId
-      };
-      gtagFunction("event", eventName, params);
-    }
-  }
-  async function setUserProperties$1(gtagFunction, initializationPromise, properties, options) {
-    if (options && options.global) {
-      const flatProperties = {};
-      for (const key of Object.keys(properties)) {
-        flatProperties[`user_properties.${key}`] = properties[key];
-      }
-      gtagFunction("set", flatProperties);
-      return Promise.resolve();
-    } else {
-      const measurementId = await initializationPromise;
-      gtagFunction("config", measurementId, {
-        update: true,
-        "user_properties": properties
-      });
-    }
-  }
-  var defaultConsentSettingsForInit;
-  function _setConsentDefaultForInit(consentSettings) {
-    defaultConsentSettingsForInit = consentSettings;
-  }
-  function _setDefaultEventParametersForInit(customParams) {
-    defaultEventParametersForInit = customParams;
-  }
-  async function validateIndexedDB() {
-    if (!isIndexedDBAvailable()) {
-      logger2.warn(ERROR_FACTORY3.create("indexeddb-unavailable", {
-        errorInfo: "IndexedDB is not available in this environment."
-      }).message);
-      return false;
-    } else {
-      try {
-        await validateIndexedDBOpenable();
-      } catch (e) {
-        logger2.warn(ERROR_FACTORY3.create("indexeddb-unavailable", {
-          errorInfo: e?.toString()
-        }).message);
-        return false;
-      }
-    }
-    return true;
-  }
-  async function _initializeAnalytics(app2, dynamicConfigPromisesList2, measurementIdToAppId2, installations, gtagCore, dataLayerName2, options) {
-    const dynamicConfigPromise = fetchDynamicConfigWithRetry(app2);
-    dynamicConfigPromise.then((config) => {
-      measurementIdToAppId2[config.measurementId] = config.appId;
-      if (app2.options.measurementId && config.measurementId !== app2.options.measurementId) {
-        logger2.warn(`The measurement ID in the local Firebase config (${app2.options.measurementId}) does not match the measurement ID fetched from the server (${config.measurementId}). To ensure analytics events are always sent to the correct Analytics property, update the measurement ID field in the local config or remove it from the local config.`);
-      }
-    }).catch((e) => logger2.error(e));
-    dynamicConfigPromisesList2.push(dynamicConfigPromise);
-    const fidPromise = validateIndexedDB().then((envIsValid) => {
-      if (envIsValid) {
-        return installations.getId();
-      } else {
-        return void 0;
-      }
-    });
-    const [dynamicConfig, fid] = await Promise.all([
-      dynamicConfigPromise,
-      fidPromise
-    ]);
-    if (!findGtagScriptOnPage(dataLayerName2)) {
-      insertScriptTag(dataLayerName2, dynamicConfig.measurementId);
-    }
-    if (defaultConsentSettingsForInit) {
-      gtagCore("consent", "default", defaultConsentSettingsForInit);
-      _setConsentDefaultForInit(void 0);
-    }
-    gtagCore("js", /* @__PURE__ */ new Date());
-    const configProperties = options?.config ?? {};
-    configProperties[ORIGIN_KEY] = "firebase";
-    configProperties.update = true;
-    if (fid != null) {
-      configProperties[GA_FID_KEY] = fid;
-    }
-    gtagCore("config", dynamicConfig.measurementId, configProperties);
-    if (defaultEventParametersForInit) {
-      gtagCore("set", defaultEventParametersForInit);
-      _setDefaultEventParametersForInit(void 0);
-    }
-    return dynamicConfig.measurementId;
-  }
-  var AnalyticsService = class {
-    constructor(app2) {
-      this.app = app2;
-    }
-    _delete() {
-      delete initializationPromisesMap[this.app.options.appId];
-      return Promise.resolve();
-    }
-  };
-  var initializationPromisesMap = {};
-  var dynamicConfigPromisesList = [];
-  var measurementIdToAppId = {};
-  var dataLayerName = "dataLayer";
-  var gtagName = "gtag";
-  var gtagCoreFunction;
-  var wrappedGtagFunction;
-  var globalInitDone = false;
-  function warnOnBrowserContextMismatch() {
-    const mismatchedEnvMessages = [];
-    if (isBrowserExtension()) {
-      mismatchedEnvMessages.push("This is a browser extension environment.");
-    }
-    if (!areCookiesEnabled()) {
-      mismatchedEnvMessages.push("Cookies are not available.");
-    }
-    if (mismatchedEnvMessages.length > 0) {
-      const details = mismatchedEnvMessages.map((message, index) => `(${index + 1}) ${message}`).join(" ");
-      const err = ERROR_FACTORY3.create("invalid-analytics-context", {
-        errorInfo: details
-      });
-      logger2.warn(err.message);
-    }
-  }
-  function factory(app2, installations, options) {
-    warnOnBrowserContextMismatch();
-    const appId = app2.options.appId;
-    if (!appId) {
-      throw ERROR_FACTORY3.create(
-        "no-app-id"
-        /* AnalyticsError.NO_APP_ID */
-      );
-    }
-    if (!app2.options.apiKey) {
-      if (app2.options.measurementId) {
-        logger2.warn(`The "apiKey" field is empty in the local Firebase config. This is needed to fetch the latest measurement ID for this Firebase app. Falling back to the measurement ID ${app2.options.measurementId} provided in the "measurementId" field in the local Firebase config.`);
-      } else {
-        throw ERROR_FACTORY3.create(
-          "no-api-key"
-          /* AnalyticsError.NO_API_KEY */
-        );
-      }
-    }
-    if (initializationPromisesMap[appId] != null) {
-      throw ERROR_FACTORY3.create("already-exists", {
-        id: appId
-      });
-    }
-    if (!globalInitDone) {
-      getOrCreateDataLayer(dataLayerName);
-      const { wrappedGtag, gtagCore } = wrapOrCreateGtag(initializationPromisesMap, dynamicConfigPromisesList, measurementIdToAppId, dataLayerName, gtagName);
-      wrappedGtagFunction = wrappedGtag;
-      gtagCoreFunction = gtagCore;
-      globalInitDone = true;
-    }
-    initializationPromisesMap[appId] = _initializeAnalytics(app2, dynamicConfigPromisesList, measurementIdToAppId, installations, gtagCoreFunction, dataLayerName, options);
-    const analyticsInstance = new AnalyticsService(app2);
-    return analyticsInstance;
-  }
-  function setUserProperties(analyticsInstance, properties, options) {
-    analyticsInstance = getModularInstance(analyticsInstance);
-    setUserProperties$1(wrappedGtagFunction, initializationPromisesMap[analyticsInstance.app.options.appId], properties, options).catch((e) => logger2.error(e));
-  }
-  function logEvent(analyticsInstance, eventName, eventParams, options) {
-    analyticsInstance = getModularInstance(analyticsInstance);
-    logEvent$1(wrappedGtagFunction, initializationPromisesMap[analyticsInstance.app.options.appId], eventName, eventParams, options).catch((e) => logger2.error(e));
-  }
-  var name5 = "@firebase/analytics";
-  var version5 = "0.10.22";
-  function registerAnalytics() {
-    _registerComponent(new Component(
-      ANALYTICS_TYPE,
-      (container, { options: analyticsOptions }) => {
-        const app2 = container.getProvider("app").getImmediate();
-        const installations = container.getProvider("installations-internal").getImmediate();
-        return factory(app2, installations, analyticsOptions);
-      },
-      "PUBLIC"
-      /* ComponentType.PUBLIC */
-    ));
-    _registerComponent(new Component(
-      "analytics-internal",
-      internalFactory2,
-      "PRIVATE"
-      /* ComponentType.PRIVATE */
-    ));
-    registerVersion(name5, version5);
-    registerVersion(name5, version5, "esm2020");
-    function internalFactory2(container) {
-      try {
-        const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
-        return {
-          logEvent: (eventName, eventParams, options) => logEvent(analytics, eventName, eventParams, options),
-          setUserProperties: (properties, options) => setUserProperties(analytics, properties, options)
-        };
-      } catch (e) {
-        throw ERROR_FACTORY3.create("interop-component-reg-failed", {
-          reason: e
-        });
-      }
-    }
-  }
-  registerAnalytics();
-
   // src/firebase-config.js
   var FIREBASE_CONFIG = {
     apiKey: "AIzaSyDmegbs41OzQ6g_S50W5gesORIOJG_alOk",
@@ -30300,7 +29137,7 @@ This typically indicates that your device does not have a healthy Internet conne
       });
     });
     if (unsubscribeHistory) unsubscribeHistory();
-    const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(10));
+    const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
     unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
       chrome.storage.local.set({ history: snap.docs.map((d) => d.data()) });
     });
@@ -30320,22 +29157,64 @@ This typically indicates that your device does not have a healthy Internet conne
     console.error("ClipSync sign-in failed:", err);
     chrome.storage.local.set({ signedIn: false, authError: err.message });
   });
-  chrome.runtime.onMessage.addListener(
-    (msg, _sender, sendResponse) => {
-      if (msg.type === "CLEAR_BADGE") {
-        chrome.action.setBadgeText({ text: "" });
-        sendResponse({ ok: true });
-      }
-      if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {
-        pushClipboard(msg.text, "chrome");
-        return;
-      }
-      if (msg.type === "PUSH_CLIPBOARD") {
-        pushClipboard(msg.text, "chrome").then((res) => sendResponse(res)).catch((err) => sendResponse({ ok: false, error: err.message }));
-        return true;
+  chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+      id: "clipsync-send",
+      title: "Send via ClipSync",
+      contexts: ["selection"]
+    });
+  });
+  chrome.contextMenus.onClicked.addListener((info) => {
+    if (info.menuItemId === "clipsync-send" && info.selectionText) {
+      pushClipboard(info.selectionText, "chrome").then((res) => {
+        if (res.ok) {
+          chrome.action.setBadgeText({ text: "\u2713" });
+          chrome.action.setBadgeBackgroundColor({ color: "#6366F1" });
+          setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2e3);
+        }
+      });
+    }
+  });
+  chrome.commands.onCommand.addListener(async (command) => {
+    if (command === "send-clipboard") {
+      try {
+        await ensureOffscreenDocument();
+        chrome.runtime.sendMessage({ type: "OFFSCREEN_READ" }, async (response) => {
+          if (response && response.text) {
+            const res = await pushClipboard(response.text, "chrome");
+            if (res.ok) {
+              chrome.action.setBadgeText({ text: "\u2713" });
+              chrome.action.setBadgeBackgroundColor({ color: "#6366F1" });
+              setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2e3);
+              chrome.notifications.create({
+                type: "basic",
+                iconUrl: "icon128.png",
+                title: "Clipboard sent via ClipSync",
+                message: response.text.length > 80 ? response.text.slice(0, 80) + "\u2026" : response.text
+              });
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Keyboard shortcut error:", err);
       }
     }
-  );
+  });
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg.type === "CLEAR_BADGE") {
+      chrome.action.setBadgeText({ text: "" });
+      sendResponse({ ok: true });
+      return;
+    }
+    if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {
+      pushClipboard(msg.text, "chrome");
+      return;
+    }
+    if (msg.type === "PUSH_CLIPBOARD") {
+      pushClipboard(msg.text, "chrome").then((res) => sendResponse(res)).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
+    }
+  });
 })();
 /*! Bundled license information:
 
@@ -30455,12 +29334,14 @@ This typically indicates that your device does not have a healthy Internet conne
    *)
 
 @firebase/util/dist/index.esm.js:
+@firebase/component/dist/esm/index.esm.js:
+@firebase/app/dist/esm/index.esm.js:
+@firebase/app/dist/esm/index.esm.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/installations/dist/esm/index.esm.js:
-@firebase/analytics/dist/esm/index.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
   (**
    * @license
    * Copyright 2019 Google LLC
@@ -30477,6 +29358,61 @@ This typically indicates that your device does not have a healthy Internet conne
    * See the License for the specific language governing permissions and
    * limitations under the License.
    *)
+
+@firebase/util/dist/index.esm.js:
+firebase/app/dist/esm/index.esm.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/common-456515ba.esm.js:
+@firebase/firestore/dist/index.esm.js:
+@firebase/firestore/dist/index.esm.js:
+@firebase/firestore/dist/index.esm.js:
+@firebase/firestore/dist/index.esm.js:
+@firebase/firestore/dist/index.esm.js:
   (**
    * @license
    * Copyright 2020 Google LLC
@@ -30514,35 +29450,6 @@ This typically indicates that your device does not have a healthy Internet conne
   (**
    * @license
    * Copyright 2025 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-
-@firebase/component/dist/esm/index.esm.js:
-@firebase/app/dist/esm/index.esm.js:
-@firebase/app/dist/esm/index.esm.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/installations/dist/esm/index.esm.js:
-@firebase/installations/dist/esm/index.esm.js:
-@firebase/installations/dist/esm/index.esm.js:
-@firebase/installations/dist/esm/index.esm.js:
-  (**
-   * @license
-   * Copyright 2019 Google LLC
    *
    * Licensed under the Apache License, Version 2.0 (the "License");
    * you may not use this file except in compliance with the License.
@@ -30625,77 +29532,6 @@ This typically indicates that your device does not have a healthy Internet conne
    * limitations under the License.
    *)
 
-firebase/app/dist/esm/index.esm.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/firestore/dist/index.esm.js:
-@firebase/installations/dist/esm/index.esm.js:
-  (**
-   * @license
-   * Copyright 2020 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *   http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   *)
-
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/firestore/dist/index.esm.js:
@@ -30718,7 +29554,6 @@ firebase/app/dist/esm/index.esm.js:
 
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
-@firebase/analytics/dist/esm/index.esm.js:
   (**
    * @license
    * Copyright 2020 Google LLC
@@ -30788,6 +29623,43 @@ firebase/app/dist/esm/index.esm.js:
   (**
    * @license
    * Copyright 2023 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+@firebase/auth/dist/esm/index-d90d2ee5.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2020 Google LLC
    *
    * Licensed under the Apache License, Version 2.0 (the "License");
    * you may not use this file except in compliance with the License.

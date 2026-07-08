@@ -27,5 +27,9 @@
       navigator.clipboard.writeText(msg.text).then(() => sendResponse({ ok: true })).catch((err) => sendResponse({ ok: false, error: err.message }));
       return true;
     }
+    if (msg.type === "OFFSCREEN_READ") {
+      navigator.clipboard.readText().then((text) => sendResponse({ ok: true, text })).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
+    }
   });
 })();
