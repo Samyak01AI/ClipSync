@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.ClipSync" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/brand_indigo</item>
+        <item name="colorPrimaryVariant">@color/brand_purple</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <color name="brand_indigo">#6366F1</color>
+    <color name="brand_purple">#A855F7</color>
+    <color name="bg_dark">#0F1117</color>
+    <color name="bg_card">#1A1D2E</color>
+    <color name="text_primary">#E8EAED</color>
+    <color name="text_secondary">#9AA0A6</color>
+    <color name="text_tertiary">#5F6368</color>
+    <color name="border_dark">#2D3148</color>
+    <color name="success">#22C55E</color>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ClipSync</string>
+    <string name="accessibility_service_description">Allows ClipSync to detect clipboard changes in the background and sync them to your other devices.</string>
+</resources>

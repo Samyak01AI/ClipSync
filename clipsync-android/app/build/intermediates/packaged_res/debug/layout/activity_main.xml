@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F1117"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="28dp"
+        android:gravity="center_horizontal">
+
+        <!-- Logo -->
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/logo_bg"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="⚡"
+                android:textSize="32sp" />
+        </FrameLayout>
+
+        <!-- Brand -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ClipSync"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#E8EAED"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clipboard sync across all your devices"
+            android:textSize="14sp"
+            android:textColor="#9AA0A6"
+            android:layout_marginTop="4dp" />
+
+        <!-- Cloud Status -->
+        <TextView
+            android:id="@+id/firebaseStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connecting to cloud…"
+            android:textSize="12sp"
+            android:textColor="#818CF8"
+            android:layout_marginTop="8dp" />
+
+        <!-- ===== SEND CLIPBOARD CARD ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="20dp"
+            android:layout_marginTop="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SEND TO PC"
+                android:textSize="10sp"
+                android:textColor="#9AA0A6"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Copy text on your phone, then tap below to send it to your PC instantly."
+                android:textSize="13sp"
+                android:textColor="#E8EAED"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="14dp"
+                android:text="Send Clipboard to PC"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_primary"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+
+        <!-- ===== LAST SYNCED CLIP ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="20dp"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LAST SYNCED"
+                android:textSize="10sp"
+                android:textColor="#9AA0A6"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/lastClipText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No clips synced yet"
+                android:textSize="13sp"
+                android:textColor="#E8EAED"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- ===== ACCESSIBILITY STATUS CARD ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="20dp"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BACKGROUND SYNC"
+                android:textSize="10sp"
+                android:textColor="#9AA0A6"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#E8EAED"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/enableButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="12dp"
+                android:text="Enable Accessibility Service"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/btn_secondary"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+
+        <!-- How it works -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="20dp"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HOW IT WORKS"
+                android:textSize="10sp"
+                android:textColor="#9AA0A6"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="📋  Copy any text on your phone"
+                android:textSize="13sp"
+                android:textColor="#E8EAED" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="📤  Tap 'Send Clipboard to PC'"
+                android:textSize="13sp"
+                android:textColor="#E8EAED" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="⚡  Instantly synced via cloud"
+                android:textSize="13sp"
+                android:textColor="#E8EAED" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="💻  Ctrl+V on your PC to paste!"
+                android:textSize="13sp"
+                android:textColor="#E8EAED" />
+
+        </LinearLayout>
+
+        <!-- Version -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ClipSync v1.0 • Made with ❤️"
+            android:textSize="11sp"
+            android:textColor="#5F6368"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+
+    </LinearLayout>
+</ScrollView>
