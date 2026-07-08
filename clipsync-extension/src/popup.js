@@ -1,33 +1,48 @@
 const statusEl = document.getElementById("status");
 const sendBtn = document.getElementById("sendBtn");
-const incomingEl = document.getElementById("incoming");
+const historyEl = document.getElementById("history");
 
-function renderIncoming(incoming) {
-  incomingEl.innerHTML = "";
-  if (!incoming) return;
-  const box = document.createElement("div");
-  box.className = "preview";
-  box.textContent = incoming.text;
-  const pasteBtn = document.createElement("button");
-  pasteBtn.textContent = `← Paste from ${incoming.sourceDevice}`;
-  pasteBtn.onclick = async () => {
-    await navigator.clipboard.writeText(incoming.text);
-    chrome.runtime.sendMessage({ type: "CLEAR_BADGE" });
-    pasteBtn.textContent = "Copied ✓";
-  };
-  incomingEl.appendChild(box);
-  incomingEl.appendChild(pasteBtn);
+function timeAgo(ts) {
+  if (!ts || !ts.seconds) return "";
+  const diffSec = Math.max(0, Math.floor(Date.now() / 1000 - ts.seconds));
+  if (diffSec < 60) return "just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  return `${Math.floor(diffSec / 86400)}d ago`;
+}
+
+function renderHistory(items) {
+  historyEl.innerHTML = "";
+  if (!items || items.length === 0) {
+    historyEl.innerHTML = '<div class="empty">Nothing synced yet.</div>';
+    return;
+  }
+  for (const item of items) {
+    const el = document.createElement("div");
+    el.className = "history-item";
+    el.textContent = item.text;
+    const meta = document.createElement("div");
+    meta.className = "history-meta";
+    meta.textContent = `${item.sourceDevice} · ${timeAgo(item.createdAt)}`;
+    el.appendChild(meta);
+    el.onclick = async () => {
+      await navigator.clipboard.writeText(item.text);
+      el.style.background = "#dcfce7";
+      setTimeout(() => (el.style.background = ""), 400);
+    };
+    historyEl.appendChild(el);
+  }
 }
 
 async function init() {
-  const { signedIn, authError, incoming } = await chrome.storage.local.get([
+  const { signedIn, authError, history } = await chrome.storage.local.get([
     "signedIn",
     "authError",
-    "incoming",
+    "history",
   ]);
 
   if (signedIn) {
-    statusEl.textContent = "Signed in ✓";
+    statusEl.textContent = "Signed in ✓ — syncing automatically";
     sendBtn.disabled = false;
   } else if (authError) {
     statusEl.textContent = `Sign-in failed: ${authError}`;
@@ -35,7 +50,7 @@ async function init() {
     statusEl.textContent = "Signing in…";
   }
 
-  renderIncoming(incoming);
+  renderHistory(history);
 }
 
 sendBtn.onclick = async () => {
@@ -56,3 +71,9 @@ sendBtn.onclick = async () => {
 };
 
 init();
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local") return;
+  if (changes.signedIn || changes.authError) init();
+  if (changes.history) renderHistory(changes.history.newValue);
+});

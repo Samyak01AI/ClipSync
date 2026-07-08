@@ -3,7 +3,13 @@
   "name": "ClipSync",
   "version": "0.1.0",
   "description": "Sync clipboard content between your phone and this PC.",
-  "permissions": ["storage", "notifications", "clipboardRead", "clipboardWrite"],
+  "permissions": [
+    "storage",
+    "notifications",
+    "clipboardRead",
+    "clipboardWrite",
+    "offscreen"
+  ],
   "host_permissions": [
     "https://firestore.googleapis.com/*",
     "https://identitytoolkit.googleapis.com/*",

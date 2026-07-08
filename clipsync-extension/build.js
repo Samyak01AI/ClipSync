@@ -23,5 +23,13 @@ esbuild.buildSync({
 
 fs.copyFileSync("manifest.json", path.join(dist, "manifest.json"));
 fs.copyFileSync(path.join("src", "popup.html"), path.join(dist, "popup.html"));
+fs.copyFileSync(path.join("src", "offscreen.html"), path.join(dist, "offscreen.html"));
 
+esbuild.buildSync({
+  entryPoints: ["src/offscreen.js"],
+  bundle: true,
+  outfile: "dist/offscreen.js",
+  format: "iife",
+  target: "chrome109",
+});
 console.log("Build complete -> dist/");

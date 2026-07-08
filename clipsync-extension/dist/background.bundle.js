@@ -2371,7 +2371,7 @@
           };
         }
       }
-      const query = querystring({
+      const query2 = querystring({
         ...params,
         key: auth2.config.apiKey
       }).slice(1);
@@ -2397,7 +2397,7 @@
       if (auth2.emulatorConfig && isCloudWorkstation(auth2.emulatorConfig.host)) {
         fetchArgs.credentials = "include";
       }
-      return FetchProvider.fetch()(await _getFinalTarget(auth2, auth2.config.apiHost, path, query), fetchArgs);
+      return FetchProvider.fetch()(await _getFinalTarget(auth2, auth2.config.apiHost, path, query2), fetchArgs);
     });
   }
   async function _performFetchWithErrorHandling(auth2, customErrorMap, fetchFn) {
@@ -2449,8 +2449,8 @@
     }
     return serverResponse;
   }
-  async function _getFinalTarget(auth2, host, path, query) {
-    const base = `${host}${path}?${query}`;
+  async function _getFinalTarget(auth2, host, path, query2) {
+    const base = `${host}${path}?${query2}`;
     const authInternal = auth2;
     const finalTarget = authInternal.config.emulator ? _emulatorUrl(auth2.config, base) : `${auth2.config.apiScheme}://${base}`;
     if (CookieAuthProxiedEndpoints.includes(path)) {
@@ -14684,7 +14684,7 @@
      * @param {number} [limit=0] the limit
      * @returns {string[]} the split strings
      */
-    split(input, limit = 0) {
+    split(input, limit2 = 0) {
       const m = this.matcher(input);
       const result = [];
       let emptiesSkipped = 0;
@@ -14694,11 +14694,11 @@
           last = m.end();
           continue;
         }
-        if (limit > 0 && result.length === limit - 1) {
+        if (limit2 > 0 && result.length === limit2 - 1) {
           break;
         }
         if (last === m.start()) {
-          if (limit === 0) {
+          if (limit2 === 0) {
             emptiesSkipped += 1;
             last = m.end();
             continue;
@@ -14712,14 +14712,14 @@
         result.push(m.substring(last, m.start()));
         last = m.end();
       }
-      if (limit === 0 && last !== m.inputLength()) {
+      if (limit2 === 0 && last !== m.inputLength()) {
         while (emptiesSkipped > 0) {
           result.push("");
           emptiesSkipped -= 1;
         }
         result.push(m.substring(last, m.inputLength()));
       }
-      if (limit !== 0 || result.length === 0) {
+      if (limit2 !== 0 || result.length === 0) {
         result.push(m.substring(last, m.inputLength()));
       }
       return result;
@@ -15448,6 +15448,9 @@
   function __PRIVATE_validateDocumentPath(e) {
     if (!DocumentKey.isDocumentKey(e)) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid document reference. Document references must have an even number of segments, but ${e} has ${e.length}.`);
   }
+  function __PRIVATE_validateCollectionPath(e) {
+    if (DocumentKey.isDocumentKey(e)) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid collection reference. Collection references must have an odd number of segments, but ${e} has ${e.length}.`);
+  }
   function __PRIVATE_isPlainObject(e) {
     return "object" == typeof e && null !== e && (Object.getPrototypeOf(e) === Object.prototype || null === Object.getPrototypeOf(e));
   }
@@ -15484,6 +15487,9 @@
       }
     }
     return e;
+  }
+  function __PRIVATE_validatePositiveNumber(e, t) {
+    if (t <= 0) throw new FirestoreError(D.INVALID_ARGUMENT, `Function ${e}() requires a positive number, but it was: ${t}.`);
   }
   function property(e, t) {
     const n = {
@@ -16746,6 +16752,11 @@
         });
     }
   }
+  function __PRIVATE_refValue(e, t) {
+    return {
+      referenceValue: `projects/${e.projectId}/databases/${e.database}/documents/${t.path.canonicalString()}`
+    };
+  }
   function isInteger(e) {
     return !!e && "integerValue" in e;
   }
@@ -17657,6 +17668,14 @@
       const n = e.endAt ? new Bound(e.endAt.position, e.endAt.inclusive) : null, r = e.startAt ? new Bound(e.startAt.position, e.startAt.inclusive) : null;
       return __PRIVATE_newTarget(e.path, e.collectionGroup, t, e.filters, e.limit, n, r);
     }
+  }
+  function __PRIVATE_queryWithAddedFilter(e, t) {
+    const n = e.filters.concat([t]);
+    return new __PRIVATE_QueryImpl(e.path, e.collectionGroup, e.explicitOrderBy.slice(), n, e.limit, e.limitType, e.startAt, e.endAt);
+  }
+  function __PRIVATE_queryWithAddedOrderBy(e, t) {
+    const n = e.explicitOrderBy.concat([t]);
+    return new __PRIVATE_QueryImpl(e.path, e.collectionGroup, n, e.filters.slice(), e.limit, e.limitType, e.startAt, e.endAt);
   }
   function __PRIVATE_queryWithLimit(e, t, n) {
     return new __PRIVATE_QueryImpl(e.path, e.collectionGroup, e.explicitOrderBy.slice(), e.filters.slice(), t, n, e.startAt, e.endAt);
@@ -20244,6 +20263,27 @@ Total Duration: ${a - u}ms`);
       return new _CollectionReference(this.firestore, e, this._path);
     }
   };
+  function collection(e, t, ...n) {
+    if (e = getModularInstance(e), __PRIVATE_validateNonEmptyArgument("collection", "path", t), e instanceof Firestore$1) {
+      const r = ResourcePath.fromString(t, ...n);
+      return __PRIVATE_validateCollectionPath(r), new CollectionReference(
+        e,
+        /* converter= */
+        null,
+        r
+      );
+    }
+    {
+      if (!(e instanceof DocumentReference || e instanceof CollectionReference)) throw new FirestoreError(D.INVALID_ARGUMENT, "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore");
+      const r = e._path.child(ResourcePath.fromString(t, ...n));
+      return __PRIVATE_validateCollectionPath(r), new CollectionReference(
+        e.firestore,
+        /* converter= */
+        null,
+        r
+      );
+    }
+  }
   function doc(e, t, ...n) {
     if (e = getModularInstance(e), // We allow omission of 'pathString' but explicitly prohibit passing in both
     // 'undefined' and 'null'.
@@ -20458,6 +20498,9 @@ Total Duration: ${a - u}ms`);
       return e instanceof ___PRIVATE_ServerTimestampFieldValueImpl;
     }
   };
+  function __PRIVATE_parseQueryValue(e, t, n, r = false) {
+    return __PRIVATE_parseData(n, e.createContext(r ? 4 : 3, t));
+  }
   function __PRIVATE_parseData(e, t, n) {
     if (__PRIVATE_looksLikeJsonObject(
       // Unwrap the API type from the Compat SDK. This will return the API type
@@ -28577,6 +28620,185 @@ This typically indicates that your device does not have a healthy Internet conne
   function __PRIVATE_validateHasExplicitOrderByForLimitToLast(t) {
     if ("L" === t.limitType && 0 === t.explicitOrderBy.length) throw new FirestoreError(D.UNIMPLEMENTED, "limitToLast() queries require specifying at least one orderBy() clause");
   }
+  var AppliableConstraint = class {
+  };
+  var QueryConstraint = class extends AppliableConstraint {
+  };
+  function query(t, e, ...n) {
+    let r = [];
+    e instanceof AppliableConstraint && r.push(e), r = r.concat(n), (function __PRIVATE_validateQueryConstraintArray(t2) {
+      const e2 = t2.filter(((t3) => t3 instanceof QueryCompositeFilterConstraint)).length, n2 = t2.filter(((t3) => t3 instanceof QueryFieldFilterConstraint)).length;
+      if (e2 > 1 || e2 > 0 && n2 > 0) throw new FirestoreError(D.INVALID_ARGUMENT, "InvalidQuery. When using composite filters, you cannot use more than one filter at the top level. Consider nesting the multiple filters within an `and(...)` statement. For example: change `query(query, where(...), or(...))` to `query(query, and(where(...), or(...)))`.");
+    })(r);
+    for (const e2 of r) t = e2._apply(t);
+    return t;
+  }
+  var QueryFieldFilterConstraint = class _QueryFieldFilterConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(t, e, n) {
+      super(), this._field = t, this._op = e, this._value = n, /** The type of this query constraint */
+      this.type = "where";
+    }
+    static _create(t, e, n) {
+      return new _QueryFieldFilterConstraint(t, e, n);
+    }
+    _apply(t) {
+      const e = this._parse(t);
+      return __PRIVATE_validateNewFieldFilter(t._query, e), new Query(t.firestore, t.converter, __PRIVATE_queryWithAddedFilter(t._query, e));
+    }
+    _parse(t) {
+      const e = __PRIVATE_newUserDataReader(t.firestore), n = (function __PRIVATE_newQueryFilter(t2, e2, n2, r, s, a, o) {
+        let i;
+        if (s.isKeyField()) {
+          if ("array-contains" === a || "array-contains-any" === a) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid Query. You can't perform '${a}' queries on documentId().`);
+          if ("in" === a || "not-in" === a) {
+            __PRIVATE_validateDisjunctiveFilterElements(o, a);
+            const e3 = [];
+            for (const n3 of o) e3.push(__PRIVATE_parseDocumentIdValue(r, t2, n3));
+            i = {
+              arrayValue: {
+                values: e3
+              }
+            };
+          } else i = __PRIVATE_parseDocumentIdValue(r, t2, o);
+        } else "in" !== a && "not-in" !== a && "array-contains-any" !== a || __PRIVATE_validateDisjunctiveFilterElements(o, a), i = __PRIVATE_parseQueryValue(
+          n2,
+          e2,
+          o,
+          /* allowArrays= */
+          "in" === a || "not-in" === a
+        );
+        const c = FieldFilter.create(s, a, i);
+        return c;
+      })(t._query, "where", e, t.firestore._databaseId, this._field, this._op, this._value);
+      return n;
+    }
+  };
+  var QueryCompositeFilterConstraint = class _QueryCompositeFilterConstraint extends AppliableConstraint {
+    /**
+     * @internal
+     */
+    constructor(t, e) {
+      super(), this.type = t, this._queryConstraints = e;
+    }
+    static _create(t, e) {
+      return new _QueryCompositeFilterConstraint(t, e);
+    }
+    _parse(t) {
+      const e = this._queryConstraints.map(((e2) => e2._parse(t))).filter(((t2) => t2.getFilters().length > 0));
+      return 1 === e.length ? e[0] : CompositeFilter.create(e, this._getOperator());
+    }
+    _apply(t) {
+      const e = this._parse(t);
+      return 0 === e.getFilters().length ? t : ((function __PRIVATE_validateNewFilter(t2, e2) {
+        let n = t2;
+        const r = e2.getFlattenedFilters();
+        for (const t3 of r) __PRIVATE_validateNewFieldFilter(n, t3), n = __PRIVATE_queryWithAddedFilter(n, t3);
+      })(t._query, e), new Query(t.firestore, t.converter, __PRIVATE_queryWithAddedFilter(t._query, e)));
+    }
+    _getQueryConstraints() {
+      return this._queryConstraints;
+    }
+    _getOperator() {
+      return "and" === this.type ? "and" : "or";
+    }
+  };
+  var QueryOrderByConstraint = class _QueryOrderByConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(t, e) {
+      super(), this._field = t, this._direction = e, /** The type of this query constraint */
+      this.type = "orderBy";
+    }
+    static _create(t, e) {
+      return new _QueryOrderByConstraint(t, e);
+    }
+    _apply(t) {
+      const e = (function __PRIVATE_newQueryOrderBy(t2, e2, n) {
+        if (null !== t2.startAt) throw new FirestoreError(D.INVALID_ARGUMENT, "Invalid query. You must not call startAt() or startAfter() before calling orderBy().");
+        if (null !== t2.endAt) throw new FirestoreError(D.INVALID_ARGUMENT, "Invalid query. You must not call endAt() or endBefore() before calling orderBy().");
+        const r = new OrderBy(e2, n);
+        return r;
+      })(t._query, this._field, this._direction);
+      return new Query(t.firestore, t.converter, __PRIVATE_queryWithAddedOrderBy(t._query, e));
+    }
+  };
+  function orderBy(t, e = "asc") {
+    const n = e, r = __PRIVATE_fieldPathFromArgument("orderBy", t);
+    return QueryOrderByConstraint._create(r, n);
+  }
+  var QueryLimitConstraint = class _QueryLimitConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(t, e, n) {
+      super(), this.type = t, this._limit = e, this._limitType = n;
+    }
+    static _create(t, e, n) {
+      return new _QueryLimitConstraint(t, e, n);
+    }
+    _apply(t) {
+      return new Query(t.firestore, t.converter, __PRIVATE_queryWithLimit(t._query, this._limit, this._limitType));
+    }
+  };
+  function limit(t) {
+    return __PRIVATE_validatePositiveNumber("limit", t), QueryLimitConstraint._create(
+      "limit",
+      t,
+      "F"
+      /* LimitType.First */
+    );
+  }
+  function __PRIVATE_parseDocumentIdValue(t, e, n) {
+    if ("string" == typeof (n = getModularInstance(n))) {
+      if ("" === n) throw new FirestoreError(D.INVALID_ARGUMENT, "Invalid query. When querying with documentId(), you must provide a valid document ID, but it was an empty string.");
+      if (!__PRIVATE_isCollectionGroupQuery(e) && -1 !== n.indexOf("/")) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid query. When querying a collection by documentId(), you must provide a plain document ID, but '${n}' contains a '/' character.`);
+      const r = e.path.child(ResourcePath.fromString(n));
+      if (!DocumentKey.isDocumentKey(r)) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid query. When querying a collection group by documentId(), the value provided must result in a valid document path, but '${r}' is not because it has an odd number of segments (${r.length}).`);
+      return __PRIVATE_refValue(t, new DocumentKey(r));
+    }
+    if (n instanceof DocumentReference) return __PRIVATE_refValue(t, n._key);
+    throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid query. When querying with documentId(), you must provide a valid string or a DocumentReference, but it was: ${__PRIVATE_valueDescription(n)}.`);
+  }
+  function __PRIVATE_validateDisjunctiveFilterElements(t, e) {
+    if (!Array.isArray(t) || 0 === t.length) throw new FirestoreError(D.INVALID_ARGUMENT, `Invalid Query. A non-empty array is required for '${e.toString()}' filters.`);
+  }
+  function __PRIVATE_validateNewFieldFilter(t, e) {
+    const n = (function __PRIVATE_findOpInsideFilters(t2, e2) {
+      for (const n2 of t2) for (const t3 of n2.getFlattenedFilters()) if (e2.indexOf(t3.op) >= 0) return t3.op;
+      return null;
+    })(t.filters, (function __PRIVATE_conflictingOps(t2) {
+      switch (t2) {
+        case "!=":
+          return [
+            "!=",
+            "not-in"
+            /* Operator.NOT_IN */
+          ];
+        case "array-contains-any":
+        case "in":
+          return [
+            "not-in"
+            /* Operator.NOT_IN */
+          ];
+        case "not-in":
+          return [
+            "array-contains-any",
+            "in",
+            "not-in",
+            "!="
+            /* Operator.NOT_EQUAL */
+          ];
+        default:
+          return [];
+      }
+    })(e.op));
+    if (null !== n)
+      throw n === e.op ? new FirestoreError(D.INVALID_ARGUMENT, `Invalid query. You cannot use more than one '${e.op.toString()}' filter.`) : new FirestoreError(D.INVALID_ARGUMENT, `Invalid query. You cannot use '${e.op.toString()}' filters with '${n.toString()}' filters.`);
+  }
   function __PRIVATE_applyFirestoreDataConverter(t, e, n) {
     let r;
     return r = t ? n && (n.merge || n.mergeFields) ? t.toFirestore(e, n) : t.toFirestore(e) : e, r;
@@ -28813,6 +29035,10 @@ This typically indicates that your device does not have a healthy Internet conne
     t = __PRIVATE_cast(t, DocumentReference);
     const r = __PRIVATE_cast(t.firestore, Firestore), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e, n), o = __PRIVATE_newUserDataReader(r);
     return executeWrite(r, [__PRIVATE_parseSetData(o, "setDoc", t._key, s, null !== t.converter, n).toMutation(t._key, Precondition.none())]);
+  }
+  function addDoc(t, e) {
+    const n = __PRIVATE_cast(t.firestore, Firestore), r = doc(t), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e), o = __PRIVATE_newUserDataReader(t.firestore);
+    return executeWrite(n, [__PRIVATE_parseSetData(o, "addDoc", r._key, s, null !== t.converter, {}).toMutation(r._key, Precondition.exists(false))]).then((() => r));
   }
   function onSnapshot(t, ...e) {
     t = getModularInstance(t);
@@ -30034,23 +30260,49 @@ This typically indicates that your device does not have a healthy Internet conne
   var db = getFirestore(app);
   var unsubscribe = null;
   var currentUid = null;
+  var unsubscribeHistory = null;
+  var OFFSCREEN_URL = "offscreen.html";
+  async function ensureOffscreenDocument() {
+    const existing = await chrome.runtime.getContexts({ contextTypes: ["OFFSCREEN_DOCUMENT"] });
+    if (existing.length > 0) return;
+    await chrome.offscreen.createDocument({
+      url: OFFSCREEN_URL,
+      reasons: ["CLIPBOARD"],
+      justification: "Read/write the system clipboard to sync with other devices."
+    });
+  }
+  async function pushClipboard(text, sourceDevice) {
+    if (!currentUid) return { ok: false, error: "Not signed in yet" };
+    try {
+      await setDoc(doc(db, "clipboard", currentUid), { text, sourceDevice, updatedAt: serverTimestamp() });
+      await addDoc(collection(db, "clipboard", currentUid, "history"), { text, sourceDevice, createdAt: serverTimestamp() });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  }
   function startListening(uid) {
     if (unsubscribe) unsubscribe();
-    unsubscribe = onSnapshot(doc(db, "clipboard", uid), (snap) => {
+    unsubscribe = onSnapshot(doc(db, "clipboard", uid), async (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
       if (data.sourceDevice === "chrome") return;
-      chrome.storage.local.set({
-        incoming: { text: data.text, sourceDevice: data.sourceDevice }
-      });
-      chrome.action.setBadgeText({ text: "1" });
-      chrome.action.setBadgeBackgroundColor({ color: "#4F46E5" });
+      await ensureOffscreenDocument();
+      chrome.runtime.sendMessage({ type: "OFFSCREEN_WRITE", text: data.text });
+      chrome.action.setBadgeText({ text: "\u2713" });
+      chrome.action.setBadgeBackgroundColor({ color: "#22C55E" });
+      setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3e3);
       chrome.notifications.create({
         type: "basic",
         iconUrl: "icon128.png",
-        title: `Clipboard from ${data.sourceDevice}`,
+        title: `Auto-copied from ${data.sourceDevice}`,
         message: data.text.length > 120 ? data.text.slice(0, 120) + "\u2026" : data.text
       });
+    });
+    if (unsubscribeHistory) unsubscribeHistory();
+    const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(10));
+    unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
+      chrome.storage.local.set({ history: snap.docs.map((d) => d.data()) });
     });
   }
   async function signIn() {
@@ -30061,30 +30313,29 @@ This typically indicates that your device does not have a healthy Internet conne
     );
     currentUid = cred.user.uid;
     chrome.storage.local.set({ uid: cred.user.uid, signedIn: true });
+    await ensureOffscreenDocument();
     startListening(cred.user.uid);
   }
   signIn().catch((err) => {
     console.error("ClipSync sign-in failed:", err);
     chrome.storage.local.set({ signedIn: false, authError: err.message });
   });
-  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-    if (msg.type === "CLEAR_BADGE") {
-      chrome.action.setBadgeText({ text: "" });
-      sendResponse({ ok: true });
-    }
-    if (msg.type === "PUSH_CLIPBOARD") {
-      if (!currentUid) {
-        sendResponse({ ok: false, error: "Not signed in yet" });
+  chrome.runtime.onMessage.addListener(
+    (msg, _sender, sendResponse) => {
+      if (msg.type === "CLEAR_BADGE") {
+        chrome.action.setBadgeText({ text: "" });
+        sendResponse({ ok: true });
+      }
+      if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {
+        pushClipboard(msg.text, "chrome");
+        return;
+      }
+      if (msg.type === "PUSH_CLIPBOARD") {
+        pushClipboard(msg.text, "chrome").then((res) => sendResponse(res)).catch((err) => sendResponse({ ok: false, error: err.message }));
         return true;
       }
-      setDoc(doc(db, "clipboard", currentUid), {
-        text: msg.text,
-        sourceDevice: "chrome",
-        updatedAt: serverTimestamp()
-      }).then(() => sendResponse({ ok: true })).catch((err) => sendResponse({ ok: false, error: err.message }));
-      return true;
     }
-  });
+  );
 })();
 /*! Bundled license information:
 
@@ -30098,7 +30349,6 @@ This typically indicates that your device does not have a healthy Internet conne
 @firebase/util/dist/index.esm.js:
 @firebase/util/dist/index.esm.js:
 @firebase/logger/dist/esm/index.esm.js:
-@firebase/firestore/dist/common-456515ba.esm.js:
 @firebase/firestore/dist/common-456515ba.esm.js:
 @firebase/firestore/dist/common-456515ba.esm.js:
 @firebase/firestore/dist/common-456515ba.esm.js:
@@ -30774,7 +31024,7 @@ re2js/build/index.esm.js:
 @firebase/firestore/dist/common-456515ba.esm.js:
   (**
    * @license
-   * Copyright 2025 Google LLC
+   * Copyright 2017 Google LLC
    *
    * Licensed under the Apache License, Version 2.0 (the "License");
    * you may not use this file except in compliance with the License.
@@ -30790,7 +31040,7 @@ re2js/build/index.esm.js:
    *)
   (**
    * @license
-   * Copyright 2017 Google LLC
+   * Copyright 2025 Google LLC
    *
    * Licensed under the Apache License, Version 2.0 (the "License");
    * you may not use this file except in compliance with the License.
