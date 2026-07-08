@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "ClipSync",
+  "version": "0.1.0",
+  "description": "Sync clipboard content between your phone and this PC.",
+  "permissions": ["storage", "notifications", "clipboardRead", "clipboardWrite"],
+  "host_permissions": [
+    "https://firestore.googleapis.com/*",
+    "https://identitytoolkit.googleapis.com/*",
+    "https://securetoken.googleapis.com/*",
+    "https://www.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ClipSync"
+  }
+}
