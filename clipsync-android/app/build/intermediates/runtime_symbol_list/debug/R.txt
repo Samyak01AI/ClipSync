@@ -2947,6 +2947,7 @@ int drawable design_ic_visibility 0x7f070095
 int drawable design_ic_visibility_off 0x7f070096
 int drawable design_password_eye 0x7f070097
 int drawable design_snackbar_background 0x7f070098
+int drawable error_bg 0x7f0700fd
 int drawable googleg_disabled_color_18 0x7f070099
 int drawable googleg_standard_color_18 0x7f07009a
 int drawable ic_arrow_back_black_24 0x7f07009b
@@ -2968,6 +2969,7 @@ int drawable ic_mtrl_chip_checked_black 0x7f0700aa
 int drawable ic_mtrl_chip_checked_circle 0x7f0700ab
 int drawable ic_mtrl_chip_close_circle 0x7f0700ac
 int drawable ic_search_black_24 0x7f0700ad
+int drawable input_bg 0x7f0700fe
 int drawable logo_bg 0x7f0700fb
 int drawable m3_avd_hide_password 0x7f0700ae
 int drawable m3_avd_show_password 0x7f0700af
@@ -3123,6 +3125,10 @@ int id animateToStart 0x7f08004b
 int id arc 0x7f08004c
 int id asConfigured 0x7f08004d
 int id async 0x7f08004e
+int id authButton 0x7f0801d1
+int id authErrorText 0x7f0801d2
+int id authLayout 0x7f0801d3
+int id authToggle 0x7f0801d4
 int id auto 0x7f08004f
 int id autoComplete 0x7f080050
 int id autoCompleteToEnd 0x7f080051
@@ -3203,6 +3209,7 @@ int id edge 0x7f08009b
 int id edit_query 0x7f08009c
 int id edit_text_id 0x7f08009d
 int id elastic 0x7f08009e
+int id emailInput 0x7f0801d5
 int id embed 0x7f08009f
 int id enableButton 0x7f0800a0
 int id end 0x7f0800a1
@@ -3217,7 +3224,6 @@ int id fill 0x7f0800a9
 int id fill_horizontal 0x7f0800aa
 int id fill_vertical 0x7f0800ab
 int id filled 0x7f0800ac
-int id firebaseStatus 0x7f0801ce
 int id fitCenter 0x7f0800ad
 int id fitEnd 0x7f0800ae
 int id fitStart 0x7f0800af
@@ -3270,6 +3276,7 @@ int id linear 0x7f0800dc
 int id listMode 0x7f0800dd
 int id list_item 0x7f0800de
 int id m3_side_sheet 0x7f0800df
+int id mainLayout 0x7f0801d6
 int id marquee 0x7f0800e0
 int id masked 0x7f0800e1
 int id match_parent 0x7f0800e2
@@ -3366,6 +3373,7 @@ int id parent 0x7f08013c
 int id parentPanel 0x7f08013d
 int id parentRelative 0x7f08013e
 int id parent_matrix 0x7f08013f
+int id passwordInput 0x7f0801d7
 int id password_toggle 0x7f080140
 int id path 0x7f080141
 int id pathRelative 0x7f080142
@@ -3416,6 +3424,7 @@ int id shortcut 0x7f08016d
 int id showCustom 0x7f08016e
 int id showHome 0x7f08016f
 int id showTitle 0x7f080170
+int id signOutButton 0x7f0801d8
 int id sin 0x7f080171
 int id skipCollapsed 0x7f080172
 int id slide 0x7f080173
@@ -3496,6 +3505,7 @@ int id uniform 0x7f0801bd
 int id unlabeled 0x7f0801be
 int id up 0x7f0801bf
 int id useLogo 0x7f0801c0
+int id userEmailText 0x7f0801d9
 int id view_offset_helper 0x7f0801c1
 int id view_tree_lifecycle_owner 0x7f0801c2
 int id view_tree_on_back_pressed_dispatcher_owner 0x7f0801c3

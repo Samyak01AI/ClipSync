@@ -14,10 +14,22 @@
   var pinnedCount = document.getElementById("pinnedCount");
   var toast = document.getElementById("toast");
   var tabs = document.querySelectorAll(".tab");
+  var authScreen = document.getElementById("authScreen");
+  var appScreen = document.getElementById("appScreen");
+  var authTitle = document.getElementById("authTitle");
+  var authEmail = document.getElementById("authEmail");
+  var authPassword = document.getElementById("authPassword");
+  var authBtn = document.getElementById("authBtn");
+  var authError = document.getElementById("authError");
+  var authToggleText = document.getElementById("authToggleText");
+  var authToggleLink = document.getElementById("authToggleLink");
+  var userEmail = document.getElementById("userEmail");
+  var logoutBtn = document.getElementById("logoutBtn");
   var currentHistory = [];
   var pinnedItems = [];
   var activeTab = "all";
   var searchQuery = "";
+  var isSignUpMode = false;
   function initTheme() {
     const saved = localStorage.getItem("clipsync-theme");
     if (saved === "dark" || !saved && window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -40,6 +52,103 @@
     }
   };
   initTheme();
+  function showAuth() {
+    authScreen.classList.add("visible");
+    appScreen.classList.remove("visible");
+    statusText.textContent = "Not signed in";
+    statusDot.classList.remove("connected");
+    statusDot.classList.add("error");
+  }
+  function showApp(email) {
+    authScreen.classList.remove("visible");
+    appScreen.classList.add("visible");
+    userEmail.textContent = email || "";
+    statusText.textContent = "Connected";
+    statusDot.classList.remove("error");
+    statusDot.classList.add("connected");
+    sendBtn.disabled = false;
+  }
+  function showAuthError(msg) {
+    authError.textContent = msg;
+    authError.classList.add("visible");
+  }
+  function clearAuthError() {
+    authError.classList.remove("visible");
+  }
+  authToggleLink.onclick = () => {
+    isSignUpMode = !isSignUpMode;
+    clearAuthError();
+    if (isSignUpMode) {
+      authTitle.textContent = "Create an account";
+      authBtn.textContent = "Sign Up";
+      authToggleText.textContent = "Already have an account?";
+      authToggleLink.textContent = "Sign in";
+    } else {
+      authTitle.textContent = "Sign in to ClipSync";
+      authBtn.textContent = "Sign In";
+      authToggleText.textContent = "Don't have an account?";
+      authToggleLink.textContent = "Create one";
+    }
+  };
+  authBtn.onclick = async () => {
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    if (!email || !password) {
+      showAuthError("Please enter email and password.");
+      return;
+    }
+    if (password.length < 6) {
+      showAuthError("Password must be at least 6 characters.");
+      return;
+    }
+    clearAuthError();
+    authBtn.disabled = true;
+    authBtn.textContent = isSignUpMode ? "Creating account\u2026" : "Signing in\u2026";
+    const msgType = isSignUpMode ? "SIGN_UP" : "SIGN_IN";
+    const res = await chrome.runtime.sendMessage({ type: msgType, email, password });
+    if (res && res.ok) {
+      authBtn.textContent = "Success \u2713";
+    } else {
+      const errMsg = res?.error || "Unknown error";
+      if (errMsg.includes("user-not-found")) {
+        showAuthError("No account found with this email. Create one instead?");
+      } else if (errMsg.includes("wrong-password") || errMsg.includes("invalid-credential")) {
+        showAuthError("Incorrect password. Please try again.");
+      } else if (errMsg.includes("email-already-in-use")) {
+        showAuthError("This email is already registered. Try signing in.");
+      } else if (errMsg.includes("invalid-email")) {
+        showAuthError("Please enter a valid email address.");
+      } else if (errMsg.includes("weak-password")) {
+        showAuthError("Password is too weak. Use at least 6 characters.");
+      } else {
+        showAuthError(errMsg);
+      }
+      authBtn.disabled = false;
+      authBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
+    }
+  };
+  authPassword.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") authBtn.click();
+  });
+  logoutBtn.onclick = async () => {
+    const res = await chrome.runtime.sendMessage({ type: "SIGN_OUT" });
+    if (res && res.ok) {
+      showAuth();
+      showToast("Signed out \u2713");
+      authEmail.value = "";
+      authPassword.value = "";
+      isSignUpMode = false;
+      authTitle.textContent = "Sign in to ClipSync";
+      authBtn.textContent = "Sign In";
+      authBtn.disabled = false;
+      authToggleText.textContent = "Don't have an account?";
+      authToggleLink.textContent = "Create one";
+      clearAuthError();
+      currentHistory = [];
+      pinnedItems = [];
+      renderCurrentTab();
+    }
+  };
   searchToggle.onclick = () => {
     searchBar.classList.toggle("visible");
     if (searchBar.classList.contains("visible")) {
@@ -175,10 +284,7 @@
       const device = item.sourceDevice || "unknown";
       const badgeClass = device === "chrome" ? "chrome" : device === "android" ? "android" : "unknown";
       const deviceIcon = device === "chrome" ? "\u{1F4BB}" : device === "android" ? "\u{1F4F1}" : "\u2753";
-      info.innerHTML = `
-      <span class="device-badge ${badgeClass}">${deviceIcon} ${device}</span>
-      <span>${timeAgo(item.createdAt)}</span>
-    `;
+      info.innerHTML = `<span class="device-badge ${badgeClass}">${deviceIcon} ${device}</span><span>${timeAgo(item.createdAt)}</span>`;
       meta.appendChild(info);
       const actions = document.createElement("div");
       actions.className = "clip-actions";
@@ -248,21 +354,17 @@
     updateCounts();
   }
   async function init() {
-    const { signedIn, authError, history, pinnedItems: savedPins } = await chrome.storage.local.get([
+    const { signedIn, userEmail: email, authError: err, history, pinnedItems: savedPins } = await chrome.storage.local.get([
       "signedIn",
+      "userEmail",
       "authError",
       "history",
       "pinnedItems"
     ]);
-    if (signedIn) {
-      statusText.textContent = "Connected";
-      statusDot.classList.add("connected");
-      sendBtn.disabled = false;
-    } else if (authError) {
-      statusText.textContent = `Error: ${authError}`;
-      statusDot.classList.add("error");
+    if (signedIn && email) {
+      showApp(email);
     } else {
-      statusText.textContent = "Connecting\u2026";
+      showAuth();
     }
     currentHistory = history || [];
     pinnedItems = savedPins || [];
@@ -282,7 +384,7 @@
         sendLabel.textContent = "Sent \u2713";
         showToast("Clipboard sent to your devices \u2713");
       } else {
-        sendLabel.textContent = `Failed: ${res.error}`;
+        sendLabel.textContent = `Failed`;
         showToast("Failed to send: " + res.error);
       }
     } catch (err) {
@@ -298,7 +400,7 @@
   init();
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
-    if (changes.signedIn || changes.authError) init();
+    if (changes.signedIn || changes.userEmail) init();
     if (changes.history) {
       currentHistory = changes.history.newValue || [];
       renderCurrentTab();

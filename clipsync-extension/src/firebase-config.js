@@ -12,11 +12,3 @@ export const FIREBASE_CONFIG = {
   messagingSenderId: "793667147954",
   appId: "1:793667147954:web:47010cbee4a348c0ec91ab",
 };
-
-// The shared email/password account every device (Android, iOS, Chrome)
-// logs into. Create this user under Authentication -> Users in the
-// Firebase console first.
-export const SHARED_ACCOUNT = {
-  email: "me.samyak06@gmail.com",
-  password: "123123Sam",
-};

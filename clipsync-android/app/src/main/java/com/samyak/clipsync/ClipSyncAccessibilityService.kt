@@ -64,17 +64,20 @@ class ClipSyncAccessibilityService : AccessibilityService() {
         val user = auth.currentUser
         if (user != null) {
             currentUid = user.uid
+            Log.d(TAG, "Using existing auth user: ${user.email}")
             startFirestoreListener(user.uid)
-            return
+        } else {
+            Log.w(TAG, "No user signed in — open the app and sign in first")
+            // Listen for auth state changes in case user signs in later
+            auth.addAuthStateListener { firebaseAuth ->
+                val newUser = firebaseAuth.currentUser
+                if (newUser != null && currentUid == null) {
+                    currentUid = newUser.uid
+                    Log.d(TAG, "User signed in: ${newUser.email}")
+                    startFirestoreListener(newUser.uid)
+                }
+            }
         }
-        auth.signInWithEmailAndPassword(FirebaseConfig.SHARED_EMAIL, FirebaseConfig.SHARED_PASSWORD)
-            .addOnSuccessListener { result ->
-                currentUid = result.user?.uid
-                currentUid?.let { startFirestoreListener(it) }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Sign-in failed", e)
-            }
     }
 
     private fun startFirestoreListener(uid: String) {

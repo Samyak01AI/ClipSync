@@ -14,10 +14,24 @@ const pinnedCount = document.getElementById("pinnedCount");
 const toast = document.getElementById("toast");
 const tabs = document.querySelectorAll(".tab");
 
+// Auth DOM refs
+const authScreen = document.getElementById("authScreen");
+const appScreen = document.getElementById("appScreen");
+const authTitle = document.getElementById("authTitle");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const authBtn = document.getElementById("authBtn");
+const authError = document.getElementById("authError");
+const authToggleText = document.getElementById("authToggleText");
+const authToggleLink = document.getElementById("authToggleLink");
+const userEmail = document.getElementById("userEmail");
+const logoutBtn = document.getElementById("logoutBtn");
+
 let currentHistory = [];
 let pinnedItems = [];
 let activeTab = "all";
 let searchQuery = "";
+let isSignUpMode = false;
 
 // ===== THEME =====
 function initTheme() {
@@ -44,6 +58,123 @@ themeToggle.onclick = () => {
 };
 
 initTheme();
+
+// ===== AUTH =====
+function showAuth() {
+  authScreen.classList.add("visible");
+  appScreen.classList.remove("visible");
+  statusText.textContent = "Not signed in";
+  statusDot.classList.remove("connected");
+  statusDot.classList.add("error");
+}
+
+function showApp(email) {
+  authScreen.classList.remove("visible");
+  appScreen.classList.add("visible");
+  userEmail.textContent = email || "";
+  statusText.textContent = "Connected";
+  statusDot.classList.remove("error");
+  statusDot.classList.add("connected");
+  sendBtn.disabled = false;
+}
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+  authError.classList.add("visible");
+}
+
+function clearAuthError() {
+  authError.classList.remove("visible");
+}
+
+// Toggle sign in / sign up
+authToggleLink.onclick = () => {
+  isSignUpMode = !isSignUpMode;
+  clearAuthError();
+  if (isSignUpMode) {
+    authTitle.textContent = "Create an account";
+    authBtn.textContent = "Sign Up";
+    authToggleText.textContent = "Already have an account?";
+    authToggleLink.textContent = "Sign in";
+  } else {
+    authTitle.textContent = "Sign in to ClipSync";
+    authBtn.textContent = "Sign In";
+    authToggleText.textContent = "Don't have an account?";
+    authToggleLink.textContent = "Create one";
+  }
+};
+
+// Handle sign in / sign up
+authBtn.onclick = async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  if (!email || !password) {
+    showAuthError("Please enter email and password.");
+    return;
+  }
+  if (password.length < 6) {
+    showAuthError("Password must be at least 6 characters.");
+    return;
+  }
+
+  clearAuthError();
+  authBtn.disabled = true;
+  authBtn.textContent = isSignUpMode ? "Creating account…" : "Signing in…";
+
+  const msgType = isSignUpMode ? "SIGN_UP" : "SIGN_IN";
+  const res = await chrome.runtime.sendMessage({ type: msgType, email, password });
+
+  if (res && res.ok) {
+    // Auth state change will trigger init() via storage listener
+    authBtn.textContent = "Success ✓";
+  } else {
+    const errMsg = res?.error || "Unknown error";
+    // Make Firebase errors more user-friendly
+    if (errMsg.includes("user-not-found")) {
+      showAuthError("No account found with this email. Create one instead?");
+    } else if (errMsg.includes("wrong-password") || errMsg.includes("invalid-credential")) {
+      showAuthError("Incorrect password. Please try again.");
+    } else if (errMsg.includes("email-already-in-use")) {
+      showAuthError("This email is already registered. Try signing in.");
+    } else if (errMsg.includes("invalid-email")) {
+      showAuthError("Please enter a valid email address.");
+    } else if (errMsg.includes("weak-password")) {
+      showAuthError("Password is too weak. Use at least 6 characters.");
+    } else {
+      showAuthError(errMsg);
+    }
+    authBtn.disabled = false;
+    authBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
+  }
+};
+
+// Handle enter key in password field
+authPassword.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") authBtn.click();
+});
+
+// Sign out
+logoutBtn.onclick = async () => {
+  const res = await chrome.runtime.sendMessage({ type: "SIGN_OUT" });
+  if (res && res.ok) {
+    showAuth();
+    showToast("Signed out ✓");
+    // Reset form
+    authEmail.value = "";
+    authPassword.value = "";
+    isSignUpMode = false;
+    authTitle.textContent = "Sign in to ClipSync";
+    authBtn.textContent = "Sign In";
+    authBtn.disabled = false;
+    authToggleText.textContent = "Don't have an account?";
+    authToggleLink.textContent = "Create one";
+    clearAuthError();
+    currentHistory = [];
+    pinnedItems = [];
+    renderCurrentTab();
+  }
+};
 
 // ===== SEARCH =====
 searchToggle.onclick = () => {
@@ -87,14 +218,8 @@ function timeAgo(ts) {
 function isUrl(text) {
   try {
     const trimmed = text.trim();
-    if (/^https?:\/\//i.test(trimmed)) {
-      new URL(trimmed);
-      return true;
-    }
-    if (/^[\w-]+\.[\w.-]+/.test(trimmed) && trimmed.includes(".")) {
-      new URL("https://" + trimmed);
-      return true;
-    }
+    if (/^https?:\/\//i.test(trimmed)) { new URL(trimmed); return true; }
+    if (/^[\w-]+\.[\w.-]+/.test(trimmed) && trimmed.includes(".")) { new URL("https://" + trimmed); return true; }
   } catch {}
   return false;
 }
@@ -103,9 +228,7 @@ function getDomain(text) {
   try {
     const url = text.trim().startsWith("http") ? new URL(text.trim()) : new URL("https://" + text.trim());
     return url.hostname.replace(/^www\./, "");
-  } catch {
-    return text.trim().substring(0, 30);
-  }
+  } catch { return text.trim().substring(0, 30); }
 }
 
 function showToast(msg, duration = 2000) {
@@ -132,13 +255,9 @@ async function togglePin(text, sourceDevice, createdAt) {
 }
 
 async function deleteItem(item) {
-  if (!item.id) {
-    showToast("Cannot delete — no document ID");
-    return;
-  }
+  if (!item.id) { showToast("Cannot delete — no document ID"); return; }
   const res = await chrome.runtime.sendMessage({ type: "DELETE_HISTORY", docId: item.id });
   if (res && res.ok) {
-    // Also remove from pinned if it was pinned
     if (isPinned(item.text)) {
       pinnedItems = pinnedItems.filter((p) => p.text !== item.text);
       await chrome.storage.local.set({ pinnedItems });
@@ -186,16 +305,13 @@ function renderItems(container, items, showPinAction = true) {
   for (const item of filtered) {
     const el = document.createElement("div");
     el.className = "clip-item";
-
     const urlCheck = isUrl(item.text);
 
-    // Clip text
     const textEl = document.createElement("div");
     textEl.className = "clip-text" + (urlCheck ? " url-text" : "");
     textEl.textContent = item.text;
     el.appendChild(textEl);
 
-    // URL preview
     if (urlCheck) {
       const preview = document.createElement("div");
       preview.className = "clip-url-preview";
@@ -203,28 +319,19 @@ function renderItems(container, items, showPinAction = true) {
       el.appendChild(preview);
     }
 
-    // Meta row
     const meta = document.createElement("div");
     meta.className = "clip-meta";
-
     const info = document.createElement("div");
     info.className = "clip-info";
-
     const device = item.sourceDevice || "unknown";
     const badgeClass = device === "chrome" ? "chrome" : device === "android" ? "android" : "unknown";
     const deviceIcon = device === "chrome" ? "💻" : device === "android" ? "📱" : "❓";
-
-    info.innerHTML = `
-      <span class="device-badge ${badgeClass}">${deviceIcon} ${device}</span>
-      <span>${timeAgo(item.createdAt)}</span>
-    `;
+    info.innerHTML = `<span class="device-badge ${badgeClass}">${deviceIcon} ${device}</span><span>${timeAgo(item.createdAt)}</span>`;
     meta.appendChild(info);
 
-    // Action buttons
     const actions = document.createElement("div");
     actions.className = "clip-actions";
 
-    // Copy button
     const copyBtn = document.createElement("button");
     copyBtn.className = "clip-action-btn";
     copyBtn.title = "Copy to clipboard";
@@ -238,50 +345,37 @@ function renderItems(container, items, showPinAction = true) {
     };
     actions.appendChild(copyBtn);
 
-    // Pin button
     if (showPinAction) {
       const pinBtn = document.createElement("button");
       const pinned = isPinned(item.text);
       pinBtn.className = "clip-action-btn" + (pinned ? " pinned pin-visible" : "");
       pinBtn.title = pinned ? "Unpin" : "Pin this clip";
       pinBtn.textContent = pinned ? "📌" : "📍";
-      pinBtn.onclick = (e) => {
-        e.stopPropagation();
-        togglePin(item.text, item.sourceDevice, item.createdAt);
-      };
+      pinBtn.onclick = (e) => { e.stopPropagation(); togglePin(item.text, item.sourceDevice, item.createdAt); };
       actions.appendChild(pinBtn);
     }
 
-    // Delete from pinned
     if (activeTab === "pinned") {
       const removeBtn = document.createElement("button");
       removeBtn.className = "clip-action-btn";
       removeBtn.title = "Unpin";
       removeBtn.textContent = "✕";
-      removeBtn.onclick = (e) => {
-        e.stopPropagation();
-        togglePin(item.text);
-      };
+      removeBtn.onclick = (e) => { e.stopPropagation(); togglePin(item.text); };
       actions.appendChild(removeBtn);
     }
 
-    // Delete button (all tab)
     if (activeTab === "all" && item.id) {
       const delBtn = document.createElement("button");
       delBtn.className = "clip-action-btn delete-btn";
       delBtn.title = "Delete";
       delBtn.textContent = "🗑️";
-      delBtn.onclick = (e) => {
-        e.stopPropagation();
-        deleteItem(item);
-      };
+      delBtn.onclick = (e) => { e.stopPropagation(); deleteItem(item); };
       actions.appendChild(delBtn);
     }
 
     meta.appendChild(actions);
     el.appendChild(meta);
 
-    // Click to copy
     el.onclick = async () => {
       await navigator.clipboard.writeText(item.text);
       el.classList.add("copied");
@@ -304,22 +398,18 @@ function renderCurrentTab() {
 
 // ===== INIT =====
 async function init() {
-  const { signedIn, authError, history, pinnedItems: savedPins } = await chrome.storage.local.get([
+  const { signedIn, userEmail: email, authError: err, history, pinnedItems: savedPins } = await chrome.storage.local.get([
     "signedIn",
+    "userEmail",
     "authError",
     "history",
     "pinnedItems",
   ]);
 
-  if (signedIn) {
-    statusText.textContent = "Connected";
-    statusDot.classList.add("connected");
-    sendBtn.disabled = false;
-  } else if (authError) {
-    statusText.textContent = `Error: ${authError}`;
-    statusDot.classList.add("error");
+  if (signedIn && email) {
+    showApp(email);
   } else {
-    statusText.textContent = "Connecting…";
+    showAuth();
   }
 
   currentHistory = history || [];
@@ -331,10 +421,7 @@ async function init() {
 sendBtn.onclick = async () => {
   try {
     const text = await navigator.clipboard.readText();
-    if (!text || !text.trim()) {
-      showToast("Clipboard is empty");
-      return;
-    }
+    if (!text || !text.trim()) { showToast("Clipboard is empty"); return; }
     sendBtn.disabled = true;
     sendLabel.textContent = "Sending…";
     const res = await chrome.runtime.sendMessage({ type: "PUSH_CLIPBOARD", text });
@@ -342,7 +429,7 @@ sendBtn.onclick = async () => {
       sendLabel.textContent = "Sent ✓";
       showToast("Clipboard sent to your devices ✓");
     } else {
-      sendLabel.textContent = `Failed: ${res.error}`;
+      sendLabel.textContent = `Failed`;
       showToast("Failed to send: " + res.error);
     }
   } catch (err) {
@@ -361,7 +448,7 @@ init();
 // ===== LIVE UPDATES =====
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  if (changes.signedIn || changes.authError) init();
+  if (changes.signedIn || changes.userEmail) init();
   if (changes.history) {
     currentHistory = changes.history.newValue || [];
     renderCurrentTab();

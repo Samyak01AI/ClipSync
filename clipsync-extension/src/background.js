@@ -3,9 +3,12 @@ import {
   initializeAuth,
   indexedDBLocalPersistence,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { getFirestore, doc, collection, addDoc, deleteDoc, onSnapshot, setDoc, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
-import { FIREBASE_CONFIG, SHARED_ACCOUNT } from "./firebase-config.js";
+import { FIREBASE_CONFIG } from "./firebase-config.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const auth = initializeAuth(app, { persistence: indexedDBLocalPersistence });
@@ -37,12 +40,17 @@ async function pushClipboard(text, sourceDevice) {
   }
 }
 
+function stopListening() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (unsubscribeHistory) { unsubscribeHistory(); unsubscribeHistory = null; }
+}
+
 function startListening(uid) {
-  if (unsubscribe) unsubscribe();
+  stopListening();
   unsubscribe = onSnapshot(doc(db, "clipboard", uid), async (snap) => {
     if (!snap.exists()) return;
     const data = snap.data();
-    if (data.sourceDevice === "chrome") return; // ignore our own writes
+    if (data.sourceDevice === "chrome") return;
 
     await ensureOffscreenDocument();
     chrome.runtime.sendMessage({ type: "OFFSCREEN_WRITE", text: data.text });
@@ -59,29 +67,24 @@ function startListening(uid) {
     });
   });
 
-  if (unsubscribeHistory) unsubscribeHistory();
   const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
   unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
     chrome.storage.local.set({ history: snap.docs.map((d) => ({ id: d.id, ...d.data() })) });
   });
 }
 
-
-async function signIn() {
-  const cred = await signInWithEmailAndPassword(
-    auth,
-    SHARED_ACCOUNT.email,
-    SHARED_ACCOUNT.password
-  );
-  currentUid = cred.user.uid;
-  chrome.storage.local.set({ uid: cred.user.uid, signedIn: true });
-  await ensureOffscreenDocument();
-  startListening(cred.user.uid);
-}
-
-signIn().catch((err) => {
-  console.error("ClipSync sign-in failed:", err);
-  chrome.storage.local.set({ signedIn: false, authError: err.message });
+// ===== AUTH STATE LISTENER =====
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUid = user.uid;
+    chrome.storage.local.set({ signedIn: true, userEmail: user.email, authError: null });
+    await ensureOffscreenDocument();
+    startListening(user.uid);
+  } else {
+    currentUid = null;
+    stopListening();
+    chrome.storage.local.set({ signedIn: false, userEmail: null, history: [] });
+  }
 });
 
 // ===== CONTEXT MENU =====
@@ -110,7 +113,6 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (command === "send-clipboard") {
     try {
       await ensureOffscreenDocument();
-      // Request clipboard text from offscreen document
       chrome.runtime.sendMessage({ type: "OFFSCREEN_READ" }, async (response) => {
         if (response && response.text) {
           const res = await pushClipboard(response.text, "chrome");
@@ -118,7 +120,6 @@ chrome.commands.onCommand.addListener(async (command) => {
             chrome.action.setBadgeText({ text: "✓" });
             chrome.action.setBadgeBackgroundColor({ color: "#6366F1" });
             setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2000);
-
             chrome.notifications.create({
               type: "basic",
               iconUrl: "icon128.png",
@@ -140,6 +141,30 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     chrome.action.setBadgeText({ text: "" });
     sendResponse({ ok: true });
     return;
+  }
+
+  if (msg.type === "SIGN_IN") {
+    signInWithEmailAndPassword(auth, msg.email, msg.password)
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: err.message }));
+    return true;
+  }
+
+  if (msg.type === "SIGN_UP") {
+    createUserWithEmailAndPassword(auth, msg.email, msg.password)
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: err.message }));
+    return true;
+  }
+
+  if (msg.type === "SIGN_OUT") {
+    signOut(auth)
+      .then(() => {
+        chrome.storage.local.clear();
+        sendResponse({ ok: true });
+      })
+      .catch((err) => sendResponse({ ok: false, error: err.message }));
+    return true;
   }
 
   if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {

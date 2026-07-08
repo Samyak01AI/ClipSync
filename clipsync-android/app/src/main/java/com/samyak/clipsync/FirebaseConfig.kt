@@ -1,12 +1,13 @@
 package com.samyak.clipsync
 
 /**
- * Same shared account used by the Chrome extension and (eventually) the
- * iOS app. Firebase project connection itself comes from google-services.json
+ * Firebase project connection comes from google-services.json
  * (Project settings -> General -> Android app -> download this file and
  * place it at app/google-services.json).
+ *
+ * Authentication is now handled dynamically — users sign in or create
+ * an account from the app's login screen. No hardcoded credentials.
  */
 object FirebaseConfig {
-    const val SHARED_EMAIL = "me.samyak06@gmail.com"
-    const val SHARED_PASSWORD = "123123Sam"
+    // No hardcoded credentials — auth is handled via the login UI
 }

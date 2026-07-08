@@ -58,11 +58,7 @@
       --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -86,552 +82,314 @@
       top: 0;
       z-index: 10;
     }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .header-left { display: flex; align-items: center; gap: 10px; }
     .logo {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       background: linear-gradient(135deg, var(--accent), #a855f7);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: white;
-      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: white; font-weight: 700;
       box-shadow: 0 2px 8px var(--accent-glow);
     }
-
-    .brand {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .brand-name {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
+    .brand { display: flex; flex-direction: column; }
+    .brand-name { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
     .brand-status {
-      font-size: 10.5px;
-      color: var(--text-tertiary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 10.5px; color: var(--text-tertiary);
+      display: flex; align-items: center; gap: 4px;
     }
-
     .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+      width: 6px; height: 6px; border-radius: 50%;
       background: var(--text-tertiary);
       transition: background var(--transition);
     }
-
     .status-dot.connected {
       background: var(--success);
       box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
       animation: pulse 2s ease-in-out infinite;
     }
+    .status-dot.error { background: var(--danger); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-    .status-dot.error {
-      background: var(--danger);
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
+    .header-actions { display: flex; align-items: center; gap: 4px; }
     .icon-btn {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: all var(--transition);
+      width: 32px; height: 32px; border: none; background: transparent;
+      color: var(--text-secondary); border-radius: var(--radius-sm);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: all var(--transition);
     }
+    .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
 
-    .icon-btn:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
+    /* ===== AUTH SCREEN ===== */
+    .auth-screen {
+      display: none;
+      padding: 32px 24px;
+      text-align: center;
     }
-
-    /* ===== SEND SECTION ===== */
-    .send-section {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .send-btn {
-      width: 100%;
-      padding: 11px 16px;
-      border: none;
-      border-radius: var(--radius);
+    .auth-screen.visible { display: block; }
+    .auth-logo {
+      width: 56px; height: 56px;
       background: linear-gradient(135deg, var(--accent), #a855f7);
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all var(--transition);
-      box-shadow: 0 2px 8px var(--accent-glow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .send-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
-      transform: translateX(-100%);
-      transition: transform 0.6s;
-    }
-
-    .send-btn:hover::before {
-      transform: translateX(100%);
-    }
-
-    .send-btn:hover {
-      transform: translateY(-1px);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; color: white;
+      margin: 0 auto 16px;
       box-shadow: 0 4px 16px var(--accent-glow);
     }
-
-    .send-btn:active {
-      transform: translateY(0);
+    .auth-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 4px;
     }
-
-    .send-btn:disabled {
-      background: var(--bg-tertiary);
-      color: var(--text-tertiary);
-      cursor: default;
-      box-shadow: none;
-      transform: none;
+    .auth-subtitle {
+      font-size: 12.5px; color: var(--text-tertiary); margin-bottom: 24px;
     }
-
-    .send-btn:disabled::before {
-      display: none;
+    .auth-form { text-align: left; }
+    .auth-label {
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 5px; display: block;
     }
-
-    .send-btn .icon {
-      font-size: 14px;
-    }
-
-    .shortcut-hint {
-      font-size: 10px;
-      color: var(--text-tertiary);
-      text-align: center;
-      margin-top: 6px;
-      opacity: 0.7;
-    }
-
-    /* ===== TABS ===== */
-    .tabs {
-      display: flex;
-      padding: 0 18px;
-      gap: 2px;
-      border-bottom: 1px solid var(--border-color);
-      background: var(--bg-primary);
-      position: sticky;
-      top: 61px;
-      z-index: 9;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 10px 12px;
-      border: none;
-      background: transparent;
-      color: var(--text-tertiary);
-      font-family: 'Inter', sans-serif;
-      font-size: 11.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      position: relative;
-      transition: color var(--transition);
-    }
-
-    .tab:hover {
-      color: var(--text-secondary);
-    }
-
-    .tab.active {
-      color: var(--accent);
-    }
-
-    .tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 12px;
-      right: 12px;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 1px 1px 0 0;
-    }
-
-    .tab .badge {
-      font-size: 9px;
-      background: var(--accent-light);
-      color: var(--accent);
-      padding: 1px 5px;
-      border-radius: 8px;
-      margin-left: 4px;
-      font-weight: 700;
-    }
-
-    /* ===== SEARCH ===== */
-    .search-bar {
-      padding: 10px 18px;
-      display: none;
-    }
-
-    .search-bar.visible {
-      display: block;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 9px 12px 9px 34px;
+    .auth-input {
+      width: 100%; padding: 10px 12px;
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
       background: var(--bg-input);
       color: var(--text-primary);
       font-family: 'Inter', sans-serif;
-      font-size: 12.5px;
-      outline: none;
+      font-size: 13px; outline: none;
       transition: all var(--transition);
+      margin-bottom: 14px;
     }
-
-    .search-input:focus {
+    .auth-input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
+    .auth-input::placeholder { color: var(--text-tertiary); }
+    .auth-btn {
+      width: 100%; padding: 11px 16px;
+      border: none; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: white; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all var(--transition);
+      box-shadow: 0 2px 8px var(--accent-glow);
+      margin-top: 4px;
+    }
+    .auth-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+    .auth-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .auth-error {
+      font-size: 11.5px; color: var(--danger);
+      margin-top: 10px; display: none;
+      padding: 8px 10px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: var(--radius-sm);
+    }
+    .auth-error.visible { display: block; }
+    .auth-toggle {
+      font-size: 12px; color: var(--text-tertiary);
+      margin-top: 18px; text-align: center;
+    }
+    .auth-toggle a {
+      color: var(--accent); cursor: pointer;
+      font-weight: 600; text-decoration: none;
+    }
+    .auth-toggle a:hover { text-decoration: underline; }
 
-    .search-input::placeholder {
-      color: var(--text-tertiary);
+    /* ===== MAIN APP (hidden until signed in) ===== */
+    .app-screen { display: none; }
+    .app-screen.visible { display: block; }
+
+    /* ===== SEND SECTION ===== */
+    .send-section { padding: 14px 18px; border-bottom: 1px solid var(--border-color); }
+    .send-btn {
+      width: 100%; padding: 11px 16px; border: none; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: white; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all var(--transition);
+      box-shadow: 0 2px 8px var(--accent-glow);
+      position: relative; overflow: hidden;
+    }
+    .send-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      transform: translateX(-100%); transition: transform 0.6s;
+    }
+    .send-btn:hover::before { transform: translateX(100%); }
+    .send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+    .send-btn:active { transform: translateY(0); }
+    .send-btn:disabled {
+      background: var(--bg-tertiary); color: var(--text-tertiary);
+      cursor: default; box-shadow: none; transform: none;
+    }
+    .send-btn:disabled::before { display: none; }
+    .send-btn .icon { font-size: 14px; }
+    .shortcut-hint {
+      font-size: 10px; color: var(--text-tertiary);
+      text-align: center; margin-top: 6px; opacity: 0.7;
     }
 
-    .search-wrapper {
-      position: relative;
+    /* ===== USER BAR ===== */
+    .user-bar {
+      padding: 8px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    .user-email {
+      font-size: 11px; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 200px;
+    }
+    .logout-btn {
+      font-size: 10.5px; font-weight: 600; color: var(--danger);
+      background: none; border: none; cursor: pointer;
+      padding: 4px 8px; border-radius: 4px;
+      transition: all var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+    .logout-btn:hover { background: rgba(239, 68, 68, 0.08); }
+
+    /* ===== TABS ===== */
+    .tabs {
+      display: flex; padding: 0 18px; gap: 2px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-primary);
+    }
+    .tab {
+      flex: 1; padding: 10px 12px; border: none; background: transparent;
+      color: var(--text-tertiary); font-family: 'Inter', sans-serif;
+      font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.04em; cursor: pointer; position: relative;
+      transition: color var(--transition);
+    }
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active { color: var(--accent); }
+    .tab.active::after {
+      content: ''; position: absolute; bottom: 0; left: 12px; right: 12px;
+      height: 2px; background: var(--accent); border-radius: 1px 1px 0 0;
+    }
+    .tab .badge {
+      font-size: 9px; background: var(--accent-light); color: var(--accent);
+      padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: 700;
     }
 
+    /* ===== SEARCH ===== */
+    .search-bar { padding: 10px 18px; display: none; }
+    .search-bar.visible { display: block; }
+    .search-input {
+      width: 100%; padding: 9px 12px 9px 34px;
+      border: 1px solid var(--border-color); border-radius: var(--radius);
+      background: var(--bg-input); color: var(--text-primary);
+      font-family: 'Inter', sans-serif; font-size: 12.5px;
+      outline: none; transition: all var(--transition);
+    }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .search-input::placeholder { color: var(--text-tertiary); }
+    .search-wrapper { position: relative; }
     .search-icon {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 13px;
-      color: var(--text-tertiary);
-      pointer-events: none;
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; color: var(--text-tertiary); pointer-events: none;
     }
 
     /* ===== CONTENT PANELS ===== */
-    .panel {
-      display: none;
-      padding: 8px 18px 18px;
-      max-height: 310px;
-      overflow-y: auto;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    .panel::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .panel::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 4px;
-    }
+    .panel { display: none; padding: 8px 18px 18px; max-height: 280px; overflow-y: auto; }
+    .panel.active { display: block; }
+    .panel::-webkit-scrollbar { width: 4px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
     /* ===== HISTORY ITEMS ===== */
     .clip-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      margin-top: 8px;
-      cursor: pointer;
-      transition: all var(--transition);
-      position: relative;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius); padding: 10px 12px; margin-top: 8px;
+      cursor: pointer; transition: all var(--transition); position: relative;
     }
-
-    .clip-item:first-child {
-      margin-top: 0;
-    }
-
+    .clip-item:first-child { margin-top: 0; }
     .clip-item:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-glow);
-      transform: translateY(-1px);
+      background: var(--bg-card-hover); border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-glow); transform: translateY(-1px);
     }
-
-    .clip-item.copied {
-      border-color: var(--success);
-      background: var(--success-bg);
-    }
-
+    .clip-item.copied { border-color: var(--success); background: var(--success-bg); }
     .clip-text {
-      font-size: 12.5px;
-      line-height: 1.5;
-      word-break: break-word;
+      font-size: 12.5px; line-height: 1.5; word-break: break-word;
       color: var(--text-primary);
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
-
-    .clip-text.url-text {
-      color: var(--accent);
-      text-decoration: underline;
-      text-decoration-color: var(--accent-light);
-    }
-
+    .clip-text.url-text { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-light); }
     .clip-url-preview {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
-      padding: 5px 8px;
-      background: var(--accent-light);
-      border-radius: var(--radius-sm);
-      font-size: 10.5px;
-      color: var(--accent);
+      display: flex; align-items: center; gap: 6px; margin-top: 6px;
+      padding: 5px 8px; background: var(--accent-light);
+      border-radius: var(--radius-sm); font-size: 10.5px; color: var(--accent);
     }
-
-    .clip-url-preview .domain {
-      font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .clip-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 6px;
-    }
-
-    .clip-info {
-      font-size: 10.5px;
-      color: var(--text-tertiary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
+    .clip-url-preview .domain { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .clip-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .clip-info { font-size: 10.5px; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px; }
     .device-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 9.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 1px 6px; border-radius: 4px; font-size: 9.5px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
     }
-
-    .device-badge.chrome {
-      background: rgba(66, 133, 244, 0.1);
-      color: #4285f4;
-    }
-
-    .device-badge.android {
-      background: rgba(52, 168, 83, 0.1);
-      color: #34a853;
-    }
-
-    .device-badge.unknown {
-      background: var(--bg-tertiary);
-      color: var(--text-tertiary);
-    }
-
-    .clip-actions {
-      display: flex;
-      gap: 2px;
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-
-    .clip-item:hover .clip-actions {
-      opacity: 1;
-    }
-
+    .device-badge.chrome { background: rgba(66, 133, 244, 0.1); color: #4285f4; }
+    .device-badge.android { background: rgba(52, 168, 83, 0.1); color: #34a853; }
+    .device-badge.unknown { background: var(--bg-tertiary); color: var(--text-tertiary); }
+    .clip-actions { display: flex; gap: 2px; opacity: 0; transition: opacity var(--transition); }
+    .clip-item:hover .clip-actions { opacity: 1; }
     .clip-action-btn {
-      width: 24px;
-      height: 24px;
-      border: none;
-      background: transparent;
-      color: var(--text-tertiary);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 24px; height: 24px; border: none; background: transparent;
+      color: var(--text-tertiary); border-radius: 4px; cursor: pointer;
+      font-size: 12px; display: flex; align-items: center; justify-content: center;
       transition: all var(--transition);
     }
-
-    .clip-action-btn:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .clip-action-btn.pinned {
-      color: var(--pin-color);
-      opacity: 1;
-    }
-
-    .clip-action-btn.delete-btn:hover {
-      background: rgba(239, 68, 68, 0.12);
-      color: var(--danger);
-    }
-
-    .clip-action-btn.pin-visible {
-      opacity: 1;
-    }
+    .clip-action-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .clip-action-btn.pinned { color: var(--pin-color); opacity: 1; }
+    .clip-action-btn.delete-btn:hover { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+    .clip-action-btn.pin-visible { opacity: 1; }
 
     /* ===== EMPTY STATE ===== */
-    .empty-state {
-      text-align: center;
-      padding: 32px 16px;
-      color: var(--text-tertiary);
-    }
-
-    .empty-state .empty-icon {
-      font-size: 32px;
-      margin-bottom: 10px;
-      opacity: 0.5;
-    }
-
-    .empty-state .empty-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .empty-state .empty-desc {
-      font-size: 11.5px;
-      line-height: 1.5;
-    }
+    .empty-state { text-align: center; padding: 32px 16px; color: var(--text-tertiary); }
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
+    .empty-state .empty-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+    .empty-state .empty-desc { font-size: 11.5px; line-height: 1.5; }
 
     /* ===== TOAST ===== */
     .toast {
-      position: fixed;
-      bottom: 16px;
-      left: 50%;
+      position: fixed; bottom: 16px; left: 50%;
       transform: translateX(-50%) translateY(60px);
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      padding: 8px 16px;
-      border-radius: var(--radius);
-      font-size: 12px;
-      font-weight: 500;
-      box-shadow: var(--shadow-md);
-      z-index: 100;
-      opacity: 0;
+      background: var(--text-primary); color: var(--bg-primary);
+      padding: 8px 16px; border-radius: var(--radius);
+      font-size: 12px; font-weight: 500; box-shadow: var(--shadow-md);
+      z-index: 100; opacity: 0;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-      white-space: nowrap;
+      pointer-events: none; white-space: nowrap;
     }
-
-    .toast.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ===== FOOTER ===== */
     .footer {
-      padding: 10px 18px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      color: var(--text-tertiary);
-      background: var(--bg-secondary);
-    }
-
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .footer a:hover {
-      text-decoration: underline;
+      padding: 10px 18px; border-top: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: var(--text-tertiary); background: var(--bg-secondary);
     }
 
     /* ===== ANIMATIONS ===== */
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .clip-item {
-      animation: fadeInUp 0.25s ease both;
-    }
-
+    .clip-item { animation: fadeInUp 0.25s ease both; }
     .clip-item:nth-child(1) { animation-delay: 0s; }
     .clip-item:nth-child(2) { animation-delay: 0.03s; }
     .clip-item:nth-child(3) { animation-delay: 0.06s; }
     .clip-item:nth-child(4) { animation-delay: 0.09s; }
     .clip-item:nth-child(5) { animation-delay: 0.12s; }
     .clip-item:nth-child(6) { animation-delay: 0.15s; }
-
-    /* Copy feedback ripple */
     @keyframes copyRipple {
       0% { box-shadow: 0 0 0 0 var(--success); }
       70% { box-shadow: 0 0 0 6px transparent; }
       100% { box-shadow: 0 0 0 6px transparent; }
     }
-
-    .clip-item.copied {
-      animation: copyRipple 0.5s ease;
-    }
+    .clip-item.copied { animation: copyRipple 0.5s ease; }
   </style>
 </head>
 
@@ -654,35 +412,68 @@
     </div>
   </div>
 
-  <!-- SEND SECTION -->
-  <div class="send-section">
-    <button class="send-btn" id="sendBtn" disabled>
-      <span class="icon">📋</span>
-      <span id="sendLabel">Send my clipboard</span>
-      <span class="icon">→</span>
-    </button>
-    <div class="shortcut-hint">Tip: Use <strong>Ctrl+Shift+S</strong> or right-click → "Send via ClipSync"</div>
-  </div>
+  <!-- ===== AUTH SCREEN ===== -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-logo">⚡</div>
+    <div class="auth-title" id="authTitle">Sign in to ClipSync</div>
+    <div class="auth-subtitle">Sync your clipboard across all your devices</div>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" data-tab="all">All <span class="badge" id="allCount">0</span></button>
-    <button class="tab" data-tab="pinned">📌 Pinned <span class="badge" id="pinnedCount">0</span></button>
-  </div>
+    <div class="auth-form">
+      <label class="auth-label" for="authEmail">Email</label>
+      <input class="auth-input" type="email" id="authEmail" placeholder="you@example.com" />
 
-  <!-- SEARCH -->
-  <div class="search-bar" id="searchBar">
-    <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search clipboard history…" />
+      <label class="auth-label" for="authPassword">Password</label>
+      <input class="auth-input" type="password" id="authPassword" placeholder="••••••••" />
+
+      <button class="auth-btn" id="authBtn">Sign In</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+
+    <div class="auth-toggle">
+      <span id="authToggleText">Don't have an account?</span>
+      <a id="authToggleLink">Create one</a>
     </div>
   </div>
 
-  <!-- ALL PANEL -->
-  <div class="panel active" id="allPanel"></div>
+  <!-- ===== MAIN APP ===== -->
+  <div class="app-screen" id="appScreen">
 
-  <!-- PINNED PANEL -->
-  <div class="panel" id="pinnedPanel"></div>
+    <!-- USER BAR -->
+    <div class="user-bar">
+      <span class="user-email" id="userEmail"></span>
+      <button class="logout-btn" id="logoutBtn">Sign Out</button>
+    </div>
+
+    <!-- SEND SECTION -->
+    <div class="send-section">
+      <button class="send-btn" id="sendBtn" disabled>
+        <span class="icon">📋</span>
+        <span id="sendLabel">Send my clipboard</span>
+        <span class="icon">→</span>
+      </button>
+      <div class="shortcut-hint">Tip: Use <strong>Ctrl+Shift+S</strong> or right-click → "Send via ClipSync"</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="all">All <span class="badge" id="allCount">0</span></button>
+      <button class="tab" data-tab="pinned">📌 Pinned <span class="badge" id="pinnedCount">0</span></button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar" id="searchBar">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search clipboard history…" />
+      </div>
+    </div>
+
+    <!-- ALL PANEL -->
+    <div class="panel active" id="allPanel"></div>
+
+    <!-- PINNED PANEL -->
+    <div class="panel" id="pinnedPanel"></div>
+  </div>
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>

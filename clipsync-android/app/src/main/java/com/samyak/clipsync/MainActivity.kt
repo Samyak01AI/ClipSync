@@ -12,7 +12,10 @@ import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +40,110 @@ class MainActivity : AppCompatActivity() {
         createNotificationChannel()
         requestNotificationPermissionIfNeeded()
 
+        // Check if already signed in
+        val user = auth.currentUser
+        if (user != null) {
+            currentUid = user.uid
+            showMainScreen(user.email ?: "")
+            startFirestoreListener(user.uid)
+        } else {
+            showAuthScreen()
+        }
+
+        setupAuthButtons()
+        setupMainButtons()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (auth.currentUser != null) {
+            refreshStatus()
+        }
+    }
+
+    // ===== AUTH SCREEN =====
+    private fun showAuthScreen() {
+        findViewById<LinearLayout>(R.id.authLayout).visibility = View.VISIBLE
+        findViewById<LinearLayout>(R.id.mainLayout).visibility = View.GONE
+    }
+
+    private fun showMainScreen(email: String) {
+        findViewById<LinearLayout>(R.id.authLayout).visibility = View.GONE
+        findViewById<LinearLayout>(R.id.mainLayout).visibility = View.VISIBLE
+        findViewById<TextView>(R.id.userEmailText).text = email
+        refreshStatus()
+    }
+
+    private var isSignUpMode = false
+
+    private fun setupAuthButtons() {
+        val emailInput = findViewById<EditText>(R.id.emailInput)
+        val passwordInput = findViewById<EditText>(R.id.passwordInput)
+        val authBtn = findViewById<Button>(R.id.authButton)
+        val toggleLink = findViewById<TextView>(R.id.authToggle)
+        val errorText = findViewById<TextView>(R.id.authErrorText)
+
+        authBtn.setOnClickListener {
+            val email = emailInput.text.toString().trim()
+            val password = passwordInput.text.toString()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                errorText.text = "Please enter email and password."
+                errorText.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+            if (password.length < 6) {
+                errorText.text = "Password must be at least 6 characters."
+                errorText.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+
+            errorText.visibility = View.GONE
+            authBtn.isEnabled = false
+            authBtn.text = if (isSignUpMode) "Creating account…" else "Signing in…"
+
+            val task = if (isSignUpMode) {
+                auth.createUserWithEmailAndPassword(email, password)
+            } else {
+                auth.signInWithEmailAndPassword(email, password)
+            }
+
+            task.addOnSuccessListener { result ->
+                    currentUid = result.user?.uid
+                    showMainScreen(result.user?.email ?: email)
+                    currentUid?.let { startFirestoreListener(it) }
+                    Toast.makeText(this, "Signed in ✓", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    val msg = when {
+                        e.message?.contains("user-not-found") == true -> "No account found. Try creating one."
+                        e.message?.contains("wrong-password") == true || e.message?.contains("invalid-credential") == true -> "Incorrect password."
+                        e.message?.contains("email-already-in-use") == true -> "Email already registered. Try signing in."
+                        e.message?.contains("invalid-email") == true -> "Please enter a valid email."
+                        else -> e.message ?: "Sign-in failed"
+                    }
+                    errorText.text = msg
+                    errorText.visibility = View.VISIBLE
+                    authBtn.isEnabled = true
+                    authBtn.text = if (isSignUpMode) "Create Account" else "Sign In"
+                }
+        }
+
+        toggleLink.setOnClickListener {
+            isSignUpMode = !isSignUpMode
+            errorText.visibility = View.GONE
+            if (isSignUpMode) {
+                authBtn.text = "Create Account"
+                toggleLink.text = "Already have an account? Sign in"
+            } else {
+                authBtn.text = "Sign In"
+                toggleLink.text = "Don't have an account? Create one"
+            }
+        }
+    }
+
+    // ===== MAIN SCREEN =====
+    private fun setupMainButtons() {
         findViewById<Button>(R.id.enableButton).setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
@@ -45,41 +152,17 @@ class MainActivity : AppCompatActivity() {
             sendClipboard()
         }
 
-        refreshStatus()
-        signInAndListen()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refreshStatus()
-    }
-
-    // ===== FIREBASE SIGN-IN =====
-    private fun signInAndListen() {
-        val statusText = findViewById<TextView>(R.id.firebaseStatus)
-        statusText.text = "Connecting to cloud…"
-
-        val user = auth.currentUser
-        if (user != null) {
-            currentUid = user.uid
-            statusText.text = "☁️ Connected to cloud"
-            startFirestoreListener(user.uid)
-            return
+        findViewById<Button>(R.id.signOutButton).setOnClickListener {
+            auth.signOut()
+            currentUid = null
+            firestoreListener?.remove()
+            firestoreListener = null
+            showAuthScreen()
+            Toast.makeText(this, "Signed out", Toast.LENGTH_SHORT).show()
         }
-
-        auth.signInWithEmailAndPassword(FirebaseConfig.SHARED_EMAIL, FirebaseConfig.SHARED_PASSWORD)
-            .addOnSuccessListener { result ->
-                currentUid = result.user?.uid
-                statusText.text = "☁️ Connected to cloud"
-                currentUid?.let { startFirestoreListener(it) }
-            }
-            .addOnFailureListener { e ->
-                Log.e("ClipSync", "Sign-in failed", e)
-                statusText.text = "❌ Cloud connection failed: ${e.message}"
-            }
     }
 
-    // ===== LISTEN FOR INCOMING CLIPS =====
+    // ===== FIREBASE LISTENER =====
     private fun startFirestoreListener(uid: String) {
         firestoreListener?.remove()
         firestoreListener = db.collection("clipboard").document(uid)
@@ -90,7 +173,6 @@ class MainActivity : AppCompatActivity() {
                 val text = snapshot.getString("text") ?: return@addSnapshotListener
                 val source = snapshot.getString("sourceDevice") ?: return@addSnapshotListener
 
-                // Show the last synced clip in the UI
                 runOnUiThread {
                     val lastClipView = findViewById<TextView>(R.id.lastClipText)
                     val preview = if (text.length > 100) text.take(100) + "…" else text
@@ -99,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    // ===== MANUAL SEND FROM FOREGROUND =====
+    // ===== MANUAL SEND =====
     private fun sendClipboard() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = clipboard.primaryClip
@@ -112,7 +194,7 @@ class MainActivity : AppCompatActivity() {
 
         val uid = currentUid
         if (uid == null) {
-            Toast.makeText(this, "Not connected to cloud yet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Not signed in", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -120,7 +202,6 @@ class MainActivity : AppCompatActivity() {
         sendBtn.isEnabled = false
         sendBtn.text = "Sending…"
 
-        // Write to main doc
         val data = hashMapOf(
             "text" to text,
             "sourceDevice" to "android",
@@ -130,8 +211,6 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 sendBtn.text = "Sent ✓"
                 Toast.makeText(this, "Clipboard sent to your PC!", Toast.LENGTH_SHORT).show()
-
-                // Reset button after delay
                 sendBtn.postDelayed({
                     sendBtn.isEnabled = true
                     sendBtn.text = "Send Clipboard to PC"
@@ -140,14 +219,12 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 sendBtn.text = "Failed ✕"
                 Toast.makeText(this, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-
                 sendBtn.postDelayed({
                     sendBtn.isEnabled = true
                     sendBtn.text = "Send Clipboard to PC"
                 }, 1500)
             }
 
-        // Also write to history
         val historyData = hashMapOf(
             "text" to text,
             "sourceDevice" to "android",
@@ -166,7 +243,7 @@ class MainActivity : AppCompatActivity() {
             statusText.text = "✅ Accessibility service is enabled.\nBackground sync is active."
             enableBtn.text = "Accessibility: ON ✓"
         } else {
-            statusText.text = "⚠️ Accessibility service is disabled.\nBackground auto-sync won't work, but you can still use the Send button below."
+            statusText.text = "⚠️ Accessibility service is disabled.\nBackground auto-sync won't work, but you can still use the Send button."
             enableBtn.text = "Enable Accessibility Service"
         }
     }

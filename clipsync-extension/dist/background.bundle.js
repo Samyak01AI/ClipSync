@@ -5257,6 +5257,9 @@
   };
   TwitterAuthProvider.TWITTER_SIGN_IN_METHOD = "twitter.com";
   TwitterAuthProvider.PROVIDER_ID = "twitter.com";
+  async function signUp(auth2, request) {
+    return _performSignInRequest(auth2, "POST", "/v1/accounts:signUp", _addTidIfNecessary(auth2, request));
+  }
   var UserCredentialImpl = class _UserCredentialImpl {
     constructor(params) {
       this.user = params.user;
@@ -5390,6 +5393,36 @@
       await authInternal._updatePasswordPolicy();
     }
   }
+  async function createUserWithEmailAndPassword(auth2, email, password) {
+    if (_isFirebaseServerApp(auth2.app)) {
+      return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth2));
+    }
+    const authInternal = _castAuth(auth2);
+    const request = {
+      returnSecureToken: true,
+      email,
+      password,
+      clientType: "CLIENT_TYPE_WEB"
+      /* RecaptchaClientType.WEB */
+    };
+    const signUpResponse = handleRecaptchaFlow(
+      authInternal,
+      request,
+      "signUpPassword",
+      signUp,
+      "EMAIL_PASSWORD_PROVIDER"
+      /* RecaptchaAuthProvider.EMAIL_PASSWORD_PROVIDER */
+    );
+    const response = await signUpResponse.catch((error) => {
+      if (error.code === `auth/${"password-does-not-meet-requirements"}`) {
+        void recachePasswordPolicy(auth2);
+      }
+      throw error;
+    });
+    const userCredential = await UserCredentialImpl._fromIdTokenResponse(authInternal, "signIn", response);
+    await authInternal._updateCurrentUser(userCredential.user);
+    return userCredential;
+  }
   function signInWithEmailAndPassword(auth2, email, password) {
     if (_isFirebaseServerApp(auth2.app)) {
       return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth2));
@@ -5400,6 +5433,12 @@
       }
       throw error;
     });
+  }
+  function onAuthStateChanged(auth2, nextOrObserver, error, completed) {
+    return getModularInstance(auth2).onAuthStateChanged(nextOrObserver, error, completed);
+  }
+  function signOut(auth2) {
+    return getModularInstance(auth2).signOut();
   }
   function startEnrollPhoneMfa(auth2, request) {
     return _performApiRequest(auth2, "POST", "/v2/accounts/mfaEnrollment:start", _addTidIfNecessary(auth2, request));
@@ -29089,10 +29128,6 @@ This typically indicates that your device does not have a healthy Internet conne
     messagingSenderId: "793667147954",
     appId: "1:793667147954:web:47010cbee4a348c0ec91ab"
   };
-  var SHARED_ACCOUNT = {
-    email: "me.samyak06@gmail.com",
-    password: "123123Sam"
-  };
 
   // src/background.js
   var app = initializeApp(FIREBASE_CONFIG);
@@ -29121,8 +29156,18 @@ This typically indicates that your device does not have a healthy Internet conne
       return { ok: false, error: err.message };
     }
   }
+  function stopListening() {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+    if (unsubscribeHistory) {
+      unsubscribeHistory();
+      unsubscribeHistory = null;
+    }
+  }
   function startListening(uid) {
-    if (unsubscribe) unsubscribe();
+    stopListening();
     unsubscribe = onSnapshot(doc(db, "clipboard", uid), async (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
@@ -29139,26 +29184,22 @@ This typically indicates that your device does not have a healthy Internet conne
         message: data.text.length > 120 ? data.text.slice(0, 120) + "\u2026" : data.text
       });
     });
-    if (unsubscribeHistory) unsubscribeHistory();
     const historyQuery = query(collection(db, "clipboard", uid, "history"), orderBy("createdAt", "desc"), limit(20));
     unsubscribeHistory = onSnapshot(historyQuery, (snap) => {
       chrome.storage.local.set({ history: snap.docs.map((d) => ({ id: d.id, ...d.data() })) });
     });
   }
-  async function signIn() {
-    const cred = await signInWithEmailAndPassword(
-      auth,
-      SHARED_ACCOUNT.email,
-      SHARED_ACCOUNT.password
-    );
-    currentUid = cred.user.uid;
-    chrome.storage.local.set({ uid: cred.user.uid, signedIn: true });
-    await ensureOffscreenDocument();
-    startListening(cred.user.uid);
-  }
-  signIn().catch((err) => {
-    console.error("ClipSync sign-in failed:", err);
-    chrome.storage.local.set({ signedIn: false, authError: err.message });
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUid = user.uid;
+      chrome.storage.local.set({ signedIn: true, userEmail: user.email, authError: null });
+      await ensureOffscreenDocument();
+      startListening(user.uid);
+    } else {
+      currentUid = null;
+      stopListening();
+      chrome.storage.local.set({ signedIn: false, userEmail: null, history: [] });
+    }
   });
   chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
@@ -29208,6 +29249,21 @@ This typically indicates that your device does not have a healthy Internet conne
       chrome.action.setBadgeText({ text: "" });
       sendResponse({ ok: true });
       return;
+    }
+    if (msg.type === "SIGN_IN") {
+      signInWithEmailAndPassword(auth, msg.email, msg.password).then(() => sendResponse({ ok: true })).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
+    }
+    if (msg.type === "SIGN_UP") {
+      createUserWithEmailAndPassword(auth, msg.email, msg.password).then(() => sendResponse({ ok: true })).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
+    }
+    if (msg.type === "SIGN_OUT") {
+      signOut(auth).then(() => {
+        chrome.storage.local.clear();
+        sendResponse({ ok: true });
+      }).catch((err) => sendResponse({ ok: false, error: err.message }));
+      return true;
     }
     if (msg.type === "OFFSCREEN_CLIPBOARD_CHANGED") {
       pushClipboard(msg.text, "chrome");
@@ -29372,7 +29428,6 @@ This typically indicates that your device does not have a healthy Internet conne
 
 @firebase/util/dist/index.esm.js:
 firebase/app/dist/esm/index.esm.js:
-@firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
 @firebase/auth/dist/esm/index-d90d2ee5.js:
