@@ -1,4 +1,0 @@
-com.samyak.clipsync.test.app-androidTest-0 D:\hackathon\clipsync\clipsync-android\app\build\generated\res\resValues\androidTest\debug
-com.samyak.clipsync.test.app-mergeDebugAndroidTestResources-1 D:\hackathon\clipsync\clipsync-android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.samyak.clipsync.test.app-mergeDebugAndroidTestResources-2 D:\hackathon\clipsync\clipsync-android\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.samyak.clipsync.test.app-merged_res-3 D:\hackathon\clipsync\clipsync-android\app\build\intermediates\merged_res\debugAndroidTest

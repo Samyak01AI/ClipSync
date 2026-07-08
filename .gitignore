@@ -1,0 +1,18 @@
+# Android build artifacts
+clipsync-android/app/build/
+clipsync-android/build/
+clipsync-android/.gradle/
+clipsync-android/local.properties
+clipsync-android/app/google-services.json
+
+# IDE
+.idea/
+*.iml
+
+# Extension build
+clipsync-extension/node_modules/
+clipsync-extension/dist/
+
+# OS
+.DS_Store
+Thumbs.db
